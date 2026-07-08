@@ -651,16 +651,26 @@ const Audio={
   },
   speak(role,text,opt){opt=opt||{};
     return new Promise(res=>{
+      let done=false; const finish=()=>{ if(!done){done=true;res();} };
+      const a=new Audio2(); a.src='audio/'+audHash('EN::'+text)+'.mp3';   // pre-generated warm voice
+      a.onended=finish;
+      a.onerror=()=>{ this._speakBrowser(role,text,opt).then(finish); };  // fallback to browser voice
+      a.play().catch(()=>{ this._speakBrowser(role,text,opt).then(finish); });
+      setTimeout(finish, 30000);
+    });
+  },
+  _speakBrowser(role,text,opt){opt=opt||{};
+    return new Promise(res=>{
       if(!('speechSynthesis' in window)){res();return;}
       try{
         const u=new SpeechSynthesisUtterance(text);
-        const map={harold:['harold',0.85,0.9],sarah:['sarah',0.9,1.05],james:['james',0.9,0.92]};
+        const map={harold:['harold',0.9,1.0],sarah:['sarah',0.95,1.05],james:['james',0.95,0.92]};
         const m=map[role]||map.harold;
-        u.voice=this.voices[m[0]]||null; u.lang=(u.voice&&u.voice.lang)|| (role==='harold'?'en-GB':'en-US');
-        u.rate=opt.slow?0.6:m[1]; u.pitch=m[2];
+        u.voice=this.voices[m[0]]||null; u.lang=(u.voice&&u.voice.lang)||'en-GB';
+        u.rate=opt.slow?0.7:m[1]; u.pitch=m[2];
         u.onend=res; u.onerror=res;
         speechSynthesis.cancel(); speechSynthesis.speak(u);
-        setTimeout(res, Math.min(16000, 1600+text.length*110)); // safety, generous so long lines are never truncated
+        setTimeout(res, Math.min(16000, 1600+text.length*110));
       }catch(e){res();}
     });
   },

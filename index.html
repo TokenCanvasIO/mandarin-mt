@@ -425,6 +425,8 @@ const LESSONS=[
      {who:'Harold',t:"Exactly. Wǒmen bú shì. Same change — bù before shì becomes bú. You are already applying the rule without thinking."},
      {who:'jingtao',syl:build(['wo','men','bu','shi'])}
    ]),
+   INTRO("Two small courtesies to carry you anywhere. First, thank you. Xièxie. Two falling tones, said lightly, one after the other. Xièxie.",['xie','xie']),
+   INTRO("And the reply. Bú kèqi. It means you are welcome, and it says, literally, 'not formal', so please do not stand on ceremony. You already have bù, and here it meets a falling tone and rises to bú. Kèqi is the only new part.",['bu','ke','qi']),
    D("I am",['wo','shi']),
    D("You are",['ni','shi']),
    D("He is",['ta','shi']),
@@ -444,6 +446,11 @@ const LESSONS=[
    INTRO("Yīngguó — Britain.",['ying','guo']),
    INTRO("Měiguó — America.",['mei','guo']),
    INTRO("Zhōngguó — China. Zhōng means middle.",['zhong','guo']),
+   INTRO("Fǎguó. France. Fǎ, then guó. And a French person is Fǎguórén. The pattern holds every time.",['fa','guo']),
+   INTRO("Rìběn. Japan. This one is the exception to the shape. It takes no guó; the country is simply Rìběn. A Japanese person is Rìběnrén.",['ri','ben']),
+   INTRO("Déguó. Germany. Dé, then guó. Déguórén.",['de2','guo']),
+   INTRO("And a very long one, just so you own it. Àodàlìyà. Australia. Four falling tones in a row, like walking downstairs. Àodàlìyàrén.",['ao','da','li','ya']),
+   INTRO("One more small word for this lesson. Dōu. It means all, or both, and it sits before the verb. Tāmen dōu shì. They all are.",['dou']),
    EX([
      {who:'Harold',t:"She is not American, she is British. How would you say that?"},
      {who:'pause'},
@@ -474,6 +481,14 @@ const LESSONS=[
    INTRO("Yào — want, need, going to. Direct and strong.",['yao']),
    TEACH("Use xiǎng when you want to sound polite, yào when you mean business. Xǐhuān is to like or enjoy."),
    INTRO("Wén means language. Zhōngwén — Chinese. Yīngwén — English.",['zhong','wen']),
+   INTRO("And xǐhuān. To like, to enjoy. Wǒ xǐhuān. I like it.",['xi','huan']),
+   INTRO("Now three things you can do. First, chī. To eat.",['chi']),
+   INTRO("Hē. To drink.",['he']),
+   INTRO("Shuō. To speak, to say. Wǒ xiǎng shuō. I would like to speak.",['shuo']),
+   INTRO("And three things to speak about. Jiā. Home, and also family. Wǒ de jiā. My home.",['jia']),
+   INTRO("Gōngzuò. Work, a job. Two syllables, gōng and zuò. Nǐ de gōngzuò. Your work.",['gong','zuo']),
+   INTRO("Fàn. Food, a meal, cooked rice. Zhōngguó fàn. Chinese food.",['fan']),
+   INTRO("And one more small word, zhège. This, this one. Zhè is this; gè is a little counter that we will meet properly later. For now, take zhège whole. This one.",['zhe','ge']),
    EX([
      {who:'Harold',t:"How do you say 'I would like to speak Chinese'?"},
      {who:'pause'},
@@ -499,10 +514,15 @@ const LESSONS=[
 { id:5, title:'Going, coming, time',
   intro:['qu','lai','hui','zai','xianzai','jintian','mingtian','zuotian'],
   steps:[
-   INTRO("Qù — go. Lái — come. Huí — return, go back.",['qu']),
-   INTRO("Zài sits before a location. Wǒ zài jiā — I am at home.",['zai']),
+   INTRO("Qù. To go. Wǒ qù. I go.",['qu']),
+   INTRO("Lái. To come. Its opposite. Nǐ lái. You come.",['lai']),
+   INTRO("Huí. To return, to go back. Huí jiā, to head home. You already have jiā from before.",['hui']),
+   INTRO("Zài sits before a location. Wǒ zài jiā. I am at home.",['zai']),
    TEACH("There is no past tense and no future tense. The verb never changes. The time word tells you when. Zuótiān wǒ qù — yesterday I went. Míngtiān wǒ qù — tomorrow I will go."),
    INTRO("Míngtiān — tomorrow. Time comes before place: Subject, Time, Place, Verb, Object.",['ming','tian']),
+   INTRO("Jīntiān. Today. Jīn, then tiān, which is day.",['jin','tian']),
+   INTRO("Zuótiān. Yesterday. The same tiān on the end.",['zuo2','tian']),
+   INTRO("Xiànzài. Now, right now. Wǒ xiànzài zài jiā. I am at home now.",['xian','zai']),
    EX([
      {who:'Harold',t:"'Yesterday she went home' — how do you say that?"},
      {who:'pause'},
@@ -532,6 +552,8 @@ const LESSONS=[
      {who:'Harold',t:"Wǒ méiyǒu gōngzuò."},
      {who:'jingtao',syl:build(['wo','meiN','you','gong','zuo'])}
    ]),
+   INTRO("Two more nouns for this lesson. Xuéxí. To study, to learn. Wǒ xiǎng xuéxí. I would like to study.",['xue','xiP']),
+   INTRO("And shíjiān. Time. Yǒu shíjiān, to have time. Méiyǒu shíjiān, to have no time.",['shi2','jian']),
    D("I have work",['wo','you','gong','zuo']),
    D("Do you have work tomorrow?",['ni','ming','tian','you','gong','zuo','ma'],null,"？"),
    D("She doesn't have work today",['ta','jin','tian','meiN','you','gong','zuo']),
@@ -543,10 +565,16 @@ const LESSONS=[
 { id:7, title:'Time, numbers, measure words',
   intro:['ji','dian','ban','yi1','er','san','si','wu','liu','qiN','ba8','jiu','shi10','liang','ge','dou','hai','jiu','ba','zao'],
   steps:[
-   INTRO("Diǎn — o'clock. Bàn — half. Jǐ diǎn — what time.",['ji','dian']),
-   TEACH("The numbers for the clock: yī, èr, sān, sì, wǔ, liù, qī, bā, jiǔ, shí. Ten is shí; eleven is shí-yī; twelve is shí-èr."),
+   INTRO("Diǎn — o'clock. Jǐ diǎn — what time.",['ji','dian']),
+   INTRO("And bàn. Half. Sān diǎn bàn. Half past three.",['ban']),
+   INTRO("Here are your numbers, one to ten. Yī, èr, sān, sì, wǔ, liù, qī, bā, jiǔ, shí. Say them like a little song and they stay with you.",['yi1','er','san','si','wu','liu','qiN','ba8','jiu','shi10']),
+   TEACH("Ten is shí. Eleven is shí-yī, ten-one. Twelve is shí-èr, ten-two. The pattern keeps going."),
    INTRO("Now the trap. Two has two forms. Èr is the number itself. Liǎng is two of something.",['liang']),
    TEACH("Every noun needs a counter between the number and the noun. Gè is the general one. Liǎng gè rén — two people. Never èr gè. This catches everyone. Now it won't catch you."),
+   INTRO("Gè. That counter itself, the little word that sits between a number and a thing. Liǎng gè rén, two people. Yī gè jiā, one home.",['ge']),
+   INTRO("Ba. A soft word you put on the very end to turn a statement into a gentle suggestion. Wǒmen qù ba. Shall we go.",['ba']),
+   INTRO("Hái. Still, or yet. And zǎo, early. Put them together, hái zǎo, and you have 'it is still early'.",['hai']),
+   INTRO("Zǎo, on its own. Early.",['zao']),
    EX([
      {who:'Harold',t:"'Two people' — use what you have."},
      {who:'pause'},
@@ -567,9 +595,10 @@ const LESSONS=[
   intro:['neng','hui2','keyi','zhege','danshi'],
   steps:[
    TEACH("Three different cans. Néng — are you physically able, do circumstances allow? Huì — have you learned the skill? Kěyǐ — is it permitted, may you?"),
+   INTRO("Néng. Can, in the sense of being able, of circumstances allowing it. Tā bù néng lái. She can't come today.",['neng']),
    INTRO("Huì — can, in the sense of a learned skill. Also 'will'.",['hui4']),
    INTRO("Kěyǐ — may, allowed to. Two tone threes, so kě becomes tone two: kéyǐ.",[keSandhi(),'yi3']),
-   INTRO("Zhège — this one. Dànshì — but, however.",['zhe','ge']),
+   INTRO("And dànshì. But, however. Wǒ xiǎng qù, dànshì bù néng. I want to go, but I cannot.",['dan','shi']),
    EX([
      {who:'Harold',t:"'Can she speak Chinese?' — meaning does she know how?"},
      {who:'pause'},
@@ -597,7 +626,7 @@ const LESSONS=[
    D("Two people want to study Chinese",['liang','ge','ren','xiang','xue','xiP','zhong','wen']),
    D("Do you still have time today?",['ni','jin','tian','hai','you','shi2','jian','ma'],null,"？"),
    D("They are not British, they are Australian",['ta','men','bu','shi','ying','guo','ren',{p:',',t:0,c:'，'},'ta','men','shi','ao','da','li','ya','ren']),
-   D("May I speak Chinese with you?",['wo',keSandhi(),'yi3',{p:'gēn',t:1,c:'跟'},'ni','shuo','zhong','wen','ma'],"Gēn — with. Your last new link, and the shape is all yours.","？")
+   D("I have no time today, but tomorrow I can study Chinese",['wo','jin','tian','meiN','you','shi2','jian',{p:',',t:0,c:'，'},'dan','shi','ming','tian',keSandhi(),'yi3','xue','xiP','zhong','wen'],"Every single piece of this you have already met. That is the whole Foundation, in one breath.")
   ]}
 ];
 // fix the "May I go?" drill built awkwardly above

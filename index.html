@@ -771,6 +771,7 @@ function staleWords(){ return Object.keys(wordlog).filter(id=>promptCounter-word
 const stage=document.getElementById('stage');
 const PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 let grades=load('mt_grades',{});
+const DRILL_LEAD='Now it is your turn to build. I will give you the English, and you say it back to me in Mandarin, out loud, before you check. This is the part where the language becomes yours.';
 
 function setProg(){ const L=LESSONS[state.li]; document.getElementById('prog').textContent=`Lesson ${L.id} of 9 — ${L.title}`; }
 function sayBtn(label,fn){ const b=document.createElement('button'); b.className='say'; b.innerHTML=label; b.onclick=fn; return b; }
@@ -832,13 +833,11 @@ function blkDrill(step,si){
   const pe=document.createElement('div'); pe.className='eng'; pe.textContent='“'+step.en+'”'; pl.appendChild(pe);
   d.appendChild(pl);
   const ansWrap=document.createElement('div');
-  const turn=document.createElement('div'); turn.className='yourturn';
-  turn.innerHTML='<span>Say it in Mandarin, out loud. Then check.</span>';
-  const rev=document.createElement('button'); rev.className='reveal'; rev.textContent='Check answer';
-  turn.appendChild(rev); d.appendChild(turn); d.appendChild(ansWrap);
+  const rev=document.createElement('button'); rev.className='reveal'; rev.style.marginTop='10px'; rev.textContent='Check answer';
+  d.appendChild(rev); d.appendChild(ansWrap);
   function paint(g){ d.className='blk drill'+(g?' graded-'+g:''); }
   function reveal(auto){
-    turn.style.display='none';
+    rev.style.display='none';
     const ans=zhRow(step.syl,true); ans.classList.add('reveal-in'); ansWrap.appendChild(ans);
     if(step.note) ansWrap.appendChild(teachLine('Harold',step.note,'harold'));
     logWords(step,key);
@@ -901,7 +900,10 @@ function renderLesson(li,resumeNote){
   head.innerHTML=`<div class="prog2">Lesson ${L.id} of 9</div><h2>${L.title}</h2><div class="sub">Read down the page and tap any line to hear it. At each “your turn”, say it in Mandarin out loud, then check and mark how you did.</div>`;
   stage.appendChild(head);
   if(resumeNote){ const w=document.createElement('div'); w.className='wbanner'; w.textContent=resumeNote; stage.appendChild(w); }
+  let ledDrills=false;
   L.steps.forEach((step,si)=>{
+    if(step.type==='drill' && !ledDrills){ ledDrills=true;
+      const lead=document.createElement('div'); lead.className='blk'; lead.appendChild(teachLine('Harold',DRILL_LEAD,'harold')); stage.appendChild(lead); }
     let blk=null;
     if(step.type==='tones')blk=blkTones();
     else if(step.type==='intro')blk=blkIntro(step);

@@ -131,6 +131,7 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
 .blk .teacher{font-size:17px;line-height:1.6}
 .say{background:transparent;border:1px solid var(--line);opacity:.75}
 .say:hover{opacity:1}
+.say.playing{opacity:1;border-color:var(--accent);color:var(--accent);background:rgba(45,138,45,.08)}
 .blk.graded-correct{border-left-color:#2d8a2d}
 .blk.graded-nearly{border-left-color:#c47f0b}
 .blk.graded-missed{border-left-color:#c0392b}
@@ -635,7 +636,12 @@ const DEBUG=/[?&]debug=1/.test(location.search);
 // static files (audio/<hash>.mp3, <hash>_s.mp3 for slow) resolve locally.
 function audHash(t){ const b=new TextEncoder().encode(t); let h=2166136261>>>0; for(const x of b){ h^=x; h=Math.imul(h,16777619)>>>0; } return ('0000000'+h.toString(16)).slice(-8); }
 const Audio={
-  ctx:null, ready:false, voices:{harold:null,sarah:null,james:null}, azureToken:null, azureTokenAt:0,
+  ctx:null, ready:false, voices:{harold:null,sarah:null,james:null}, azureToken:null, azureTokenAt:0, cur:null, curFinish:null,
+  stop(){
+    try{ if(this.cur){ this.cur.onended=null; this.cur.onerror=null; this.cur.onplaying=null; this.cur.pause(); } }catch(e){}
+    try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+    const f=this.curFinish; this.cur=null; this.curFinish=null; if(f)f();
+  },
   unlock(){
     try{ this.ctx=new (window.AudioContext||window.webkitAudioContext)(); if(this.ctx.state==='suspended')this.ctx.resume(); }catch(e){}
     // prime speechSynthesis
@@ -653,12 +659,15 @@ const Audio={
     this.voices.james = us.find(v=>malRe.test(v.name)) || byName(malRe) || us.find(v=>v!==this.voices.sarah) || this.voices.harold;
   },
   speak(role,text,opt){opt=opt||{};
+    this.stop();
     return new Promise(res=>{
-      let done=false; const finish=()=>{ if(!done){done=true;res();} };
-      const a=new Audio2(); a.src='audio/'+audHash('EN::'+text)+'.mp3';   // pre-generated warm voice
+      let done=false, a=null;
+      const finish=()=>{ if(done)return; done=true; if(this.cur===a)this.cur=null; if(this.curFinish===finish)this.curFinish=null; res(); };
+      this.curFinish=finish;
+      a=new Audio2(); this.cur=a; a.src='audio/'+audHash('EN::'+text)+'.mp3';   // pre-generated warm voice
       a.onended=finish;
-      a.onerror=()=>{ this._speakBrowser(role,text,opt).then(finish); };  // fallback to browser voice
-      a.play().catch(()=>{ this._speakBrowser(role,text,opt).then(finish); });
+      a.onerror=()=>{ if(this.cur===a)this.cur=null; this._speakBrowser(role,text,opt).then(finish); };  // fallback to browser voice
+      a.play().catch(()=>{ if(this.cur===a)this.cur=null; this._speakBrowser(role,text,opt).then(finish); });
       setTimeout(finish, 30000);
     });
   },
@@ -693,18 +702,22 @@ const Audio={
     }catch(e){ return null; }
   },
   jingtao(text,opt){opt=opt||{};
+    this.stop();
     return new Promise(async res=>{
+      let done=false, a=null;
+      const fin=()=>{ if(done)return; done=true; if(this.cur===a)this.cur=null; if(this.curFinish===fin)this.curFinish=null; res(true); };
+      this.curFinish=fin;
       let srcs=[];
       if(settings.src==='azure' && settings.key && settings.region){ const u=await this.azure(text); if(u)srcs.push(u); }
       srcs.push('audio/'+audHash(text)+(opt.slow?'_s':'')+'.mp3'); // pre-generated static, same-origin, reliable
       srcs.push(this.youdaoUrl(text), this.googleUrl(text,opt.slow)); // runtime fallbacks (single words / non-hosted)
-      let i=0; const a=new Audio2();
-      const tryNext=()=>{ if(i>=srcs.length){ showBanner(text); res(false); return; } a.src=srcs[i++]; a.play().catch(()=>{}); };
-      a.onended=()=>{ hideBanner(); res(true); };
+      let i=0; a=new Audio2(); this.cur=a;
+      const tryNext=()=>{ if(i>=srcs.length){ showBanner(text); fin(); return; } a.src=srcs[i++]; a.play().catch(()=>{}); };
+      a.onended=()=>{ hideBanner(); fin(); };
       a.onerror=tryNext;
       a.onplaying=()=>hideBanner();
       tryNext();
-      setTimeout(()=>res(true), 16000); // safety only; onended is the real resolver
+      setTimeout(fin, 16000); // safety only; onended is the real resolver
     });
   }
 };
@@ -773,11 +786,20 @@ function staleWords(){ return Object.keys(wordlog).filter(id=>promptCounter-word
    Each drill is a "your turn" — say it aloud, check, then mark Got it / Nearly / Missed. */
 const stage=document.getElementById('stage');
 const PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const STOP='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 let grades=load('mt_grades',{});
 const DRILL_LEAD='Now it is your turn to build. I will give you the English, and you say it back to me in Mandarin, out loud, before you check. This is the part where the language becomes yours.';
 
 function setProg(){ const L=LESSONS[state.li]; document.getElementById('prog').textContent=`Lesson ${L.id} of 9 — ${L.title}`; }
-function sayBtn(label,fn){ const b=document.createElement('button'); b.className='say'; b.innerHTML=label; b.onclick=fn; return b; }
+function sayBtn(label,fn){
+  const b=document.createElement('button'); b.className='say'; b.innerHTML=label;
+  b.onclick=()=>{
+    if(b.classList.contains('playing')){ Audio.stop(); return; }   // click again = stop
+    b.classList.add('playing'); b.innerHTML=STOP+'&nbsp;Stop';
+    Promise.resolve(fn()).then(()=>{ b.classList.remove('playing'); b.innerHTML=label; });
+  };
+  return b;
+}
 
 function teachLine(who,text,role){
   const line=document.createElement('div'); line.className='line';
@@ -898,7 +920,7 @@ function renderLesson(li,resumeNote){
   if(li<0)li=0; if(li>=LESSONS.length)li=LESSONS.length-1;
   state.li=li; state.si=0; save(LS.lesson,li);
   unlockLessonWords(li); shownStars={bu:false,t3:false}; window._uShown=false; loggedSteps=new Set();
-  const L=LESSONS[li]; stage.innerHTML=''; setProg(); if(DEBUG)renderDebug();
+  Audio.stop(); const L=LESSONS[li]; stage.innerHTML=''; setProg(); if(DEBUG)renderDebug();
   const head=document.createElement('div'); head.className='lesson-head';
   head.innerHTML=`<div class="prog2">Lesson ${L.id} of 9</div><h2>${L.title}</h2><div class="sub">Read down the page and tap any line to hear it. At each “your turn”, say it in Mandarin out loud, then check and mark how you did.</div>`;
   stage.appendChild(head);

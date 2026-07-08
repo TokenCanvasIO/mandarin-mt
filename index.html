@@ -123,8 +123,12 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
 .lesson-head h2{margin:2px 0}
 .prog2{font-size:12.5px;color:var(--muted)}
 .wbanner{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:12px;font-size:14px;color:var(--muted)}
-.blk{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:12px;box-shadow:var(--shadow)}
+.blk{margin-top:18px;padding:0 2px}                 /* flat by default — reads like book prose */
+.blk.boxed,.blk.drill{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:16px;box-shadow:var(--shadow)}
 .blk.drill{border-left:3px solid var(--accent)}
+.blk .teacher{font-size:17px;line-height:1.6}
+.say{background:transparent;border:1px solid var(--line);opacity:.75}
+.say:hover{opacity:1}
 .blk.graded-correct{border-left-color:#2d8a2d}
 .blk.graded-nearly{border-left-color:#c47f0b}
 .blk.graded-missed{border-left-color:#c0392b}
@@ -775,7 +779,7 @@ function zhRow(arr){
   w.appendChild(mini); return w;
 }
 function blkTones(){
-  const d=document.createElement('div'); d.className='blk';
+  const d=document.createElement('div'); d.className='blk boxed';
   d.appendChild(teachLine('Harold','Same mouth position. Four completely different words. The colour and the hand shape become your memory, not just your brain.','harold'));
   const demo=document.createElement('div'); demo.className='tone-demo'; d.appendChild(demo);
   [[1,'mā','妈','mother'],[2,'má','麻','hemp'],[3,'mǎ','马','horse'],[4,'mà','骂','scold']].forEach(([t,py,ch,en])=>{
@@ -787,7 +791,7 @@ function blkTones(){
   return d;
 }
 function blkWordOrder(){
-  const d=document.createElement('div'); d.className='blk';
+  const d=document.createElement('div'); d.className='blk boxed';
   d.appendChild(teachLine('Harold','Here is the shape of every Mandarin sentence. Subject, then time, then place, then verb, then object. Wǒ míngtiān zài jiā chī fàn — I, tomorrow, at home, eat, food. Once you have this order you can build anything.','harold'));
   const wd=document.createElement('div'); wd.className='wo-diagram'; buildWODiagram(wd); d.appendChild(wd);
   return d;
@@ -856,7 +860,7 @@ function tallyText(){ const L=LESSONS[state.li]; let c=0,n=0,m=0,tot=0;
 function updateTally(){ const el=document.getElementById('tallyBox'); if(el)el.textContent=tallyText(); }
 
 function blkComplete(L){
-  const d=document.createElement('div'); d.className='blk';
+  const d=document.createElement('div'); d.className='blk boxed';
   d.innerHTML=`<h2>End of Lesson ${L.id}</h2><div class="sub">You built every sentence from what you already had. Tap any word to hear it again.</div>`;
   const tb=document.createElement('div'); tb.className='tally'; tb.id='tallyBox'; tb.textContent=tallyText(); d.appendChild(tb);
   (L.intro||[]).filter((v,i,a)=>a.indexOf(v)===i).forEach(id=>{ const v=VMAP[id]; if(!v)return; const arr=build(v.parts);
@@ -980,12 +984,13 @@ function start(){
   document.getElementById('beginGate').style.display='none';
   Audio.unlock();
   if(typeof speechSynthesis!=='undefined') speechSynthesis.onvoiceschanged=()=>Audio.pickVoices();
-  renderGuide();
+  renderGuide(); // populates the ? sounds guide, but never forced
   const resuming = (state.li>0 || Object.keys(grades).length>0);
-  const seenGuide = load(LS.pinyin,false);
-  const note = resuming ? `Welcome back — Lesson ${LESSONS[Math.min(state.li,LESSONS.length-1)].id}. Pick up where you left off, or scroll back over anything.` : null;
-  if(!seenGuide && !resuming){ openOverlay('guideOverlay'); document.getElementById('guideDone').onclick=()=>{ save(LS.pinyin,true); closeOverlay('guideOverlay'); renderLesson(0); }; }
-  else { renderLesson(state.li, note); }
+  const firstTime = !load(LS.pinyin,false) && !resuming;
+  let note=null;
+  if(resuming) note=`Welcome back — Lesson ${LESSONS[Math.min(state.li,LESSONS.length-1)].id}. Pick up where you left off, or scroll back over anything.`;
+  else if(firstTime){ note='New to the sounds of pinyin? The ? button, top right, has a quick guide any time. Otherwise just read down the page and tap any line to hear it.'; save(LS.pinyin,true); }
+  renderLesson(state.li, note); // straight into the lesson — reads like a book
   if(DEBUG) renderDebug();
 }
 document.getElementById('beginBtn').onclick=start;

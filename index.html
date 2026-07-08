@@ -107,6 +107,47 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
 .tooltip{position:relative}
 .done-word{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .hint{font-size:12px;color:var(--amber);cursor:pointer;border-bottom:1px dotted var(--amber)}
+/* continuous-flow footer (the only controls during a lesson) */
+.footer{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:40;width:100%;max-width:640px;
+  background:var(--bg);border-top:1px solid var(--line);display:none;gap:8px;justify-content:center;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+.footer.show{display:flex}
+.fbtn{flex:1;max-width:150px;border:1px solid var(--line);background:var(--panel);color:var(--text);
+  border-radius:12px;padding:12px;font-size:14px;font-weight:600;min-height:50px;cursor:pointer}
+.fbtn.primary{background:var(--primary);color:var(--bg);border-color:var(--primary)}
+.fbtn:disabled{opacity:.35}
+.card{margin-top:14px}
+.teacher{font-size:16.5px}
+/* ---- transcript (book) layout ---- */
+.lesson-head{padding:8px 0 2px}
+.lesson-head h2{margin:2px 0}
+.prog2{font-size:12.5px;color:var(--muted)}
+.wbanner{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:12px;font-size:14px;color:var(--muted)}
+.blk{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:12px;box-shadow:var(--shadow)}
+.blk.drill{border-left:3px solid var(--accent)}
+.blk.graded-correct{border-left-color:#2d8a2d}
+.blk.graded-nearly{border-left-color:#c47f0b}
+.blk.graded-missed{border-left-color:#c0392b}
+.line{display:flex;gap:10px;align-items:flex-start}
+.line + .line{margin-top:10px}
+.say{flex:0 0 auto;min-height:38px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:13px;padding:0 11px;white-space:nowrap}
+.say svg{width:13px;height:13px}
+.eng{font-size:18px;font-weight:500;align-self:center}
+.zh-row{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.mini{display:flex;gap:8px;flex-wrap:wrap}
+.beep{text-align:center;color:var(--accent);font-size:13px;letter-spacing:.1em;margin:10px 0}
+.yourturn{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;color:var(--muted);font-size:14px;flex-wrap:wrap}
+.reveal{border:1px solid var(--primary);background:var(--primary);color:var(--bg);border-radius:10px;padding:11px 16px;font-weight:600;cursor:pointer;min-height:46px}
+.reveal-in{animation:slidein .3s}
+.grade{display:flex;gap:8px;margin-top:14px}
+.glabel{font-size:12.5px;color:var(--muted);margin-top:12px}
+.gbtn{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:11px 6px;font-weight:600;cursor:pointer;min-height:48px;font-size:14px}
+.gbtn.g-correct.on{background:#2d8a2d;color:#fff;border-color:#2d8a2d}
+.gbtn.g-nearly.on{background:#c47f0b;color:#fff;border-color:#c47f0b}
+.gbtn.g-missed.on{background:#c0392b;color:#fff;border-color:#c0392b}
+.note{margin-top:10px;font-size:14.5px}
+.next-lesson{width:100%;margin-top:10px}
+.tally{font-size:13px;color:var(--muted);margin-top:6px}
 </style>
 </head>
 <body>
@@ -683,9 +724,8 @@ function renderSent(arr,gestAnim){
 }
 
 /* ============================================================ WORD LOG / SR */
-function logWords(step){
-  if(step.type!=='drill'&&step.type!=='intro'&&step.type!=='exchange')return;
-  const skey=state.li+'.'+state.si;
+function logWords(step,key){
+  const skey=key||(state.li+'.'+state.si);
   if(loggedSteps.has(skey))return;   // do not re-count on resume/replay
   loggedSteps.add(skey);
   promptCounter++;
@@ -709,187 +749,154 @@ function mark(id){
 function unlockLessonWords(li){ (LESSONS[li].intro||[]).forEach(id=>{ if(booklet.indexOf(id)<0){booklet.push(id);} if(!wordlog[id])wordlog[id]={introduced:promptCounter,lastSeen:promptCounter,seenCount:0}; }); save(LS.booklet,booklet); save(LS.wordlog,wordlog); }
 function staleWords(){ return Object.keys(wordlog).filter(id=>promptCounter-wordlog[id].lastSeen>=20); }
 
-/* ============================================================ FLOW ENGINE */
+/* ============================================================ TRANSCRIPT ENGINE
+   Book-style: the whole lesson is a readable transcript. Tap any line to hear it.
+   Each drill is a "your turn" — say it aloud, check, then mark Got it / Nearly / Missed. */
 const stage=document.getElementById('stage');
-let currentControls=null;
-
-function setProg(){
-  const L=LESSONS[state.li];
-  document.getElementById('prog').textContent=`Lesson ${L.id} of 9 · step ${state.si+1} of ${L.steps.length} — ${L.title}`;
-}
-
-function pauseBar(skippable){
-  return new Promise(res=>{
-    const w=document.createElement('div'); w.className='pausewrap';
-    w.innerHTML=`<div class="pauselabel">thinking time…</div><div class="pausebar"><div class="pausefill"></div></div>`;
-    stage.appendChild(w);
-    const fill=w.querySelector('.pausefill'), lab=w.querySelector('.pauselabel'), bar=w.querySelector('.pausebar');
-    const dur=4000; const t0=performance.now(); let done=false;
-    function step(t){ const p=Math.min(1,(t-t0)/dur); fill.style.width=(p*100)+'%'; if(p>=0.875)lab.style.opacity=0;
-      if(p<1&&!done)requestAnimationFrame(step); else if(!done){done=true;res();} }
-    requestAnimationFrame(step);
-    if(skippable){ bar.onclick=()=>{ if(!done){done=true;fill.style.width='100%';res();} }; }
-  });
-}
-
-async function runStep(){
-  if(state.li>=LESSONS.length)state.li=LESSONS.length-1; if(state.li<0)state.li=0;
-  const L=LESSONS[state.li];
-  if(state.si>=L.steps.length)state.si=L.steps.length-1; if(state.si<0)state.si=0;
-  stage.innerHTML=''; setProg(); if(DEBUG)renderDebug();
-  const step=L.steps[state.si];
-  const firstView=!viewed.has(state.li+'.'+state.si);
-  // lesson-boundary recycle note (first step of a lesson beyond 1)
-  if(step.type==='tones'){ await renderTones(); return; }
-  if(step.type==='wordorder'){ renderWordOrderStep(); return; }
-  if(step.type==='intro'){ await renderIntro(step); }
-  else if(step.type==='teach'){ await renderTeach(step); }
-  else if(step.type==='exchange'){ await renderExchange(step,firstView); }
-  else if(step.type==='drill'){ await renderDrill(step,firstView); }
-  viewed.add(state.li+'.'+state.si);
-  save(LS.lesson,state.li); save(LS.step,state.si);
-}
-
-function card(){ const c=document.createElement('div'); c.className='card'; stage.appendChild(c); return c; }
-function controlsBar(items){
-  const c=document.createElement('div'); c.className='controls';
-  items.forEach(it=>{ const b=document.createElement('button'); b.className='ctl'+(it.cls?' '+it.cls:''); b.innerHTML=it.label; b.onclick=it.fn; c.appendChild(b); });
-  return c;
-}
 const PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+let grades=load('mt_grades',{});
 
-async function renderIntro(step){
-  const c=card();
-  const who=document.createElement('div'); who.className='who'; who.textContent='Harold'; c.appendChild(who);
-  const t=document.createElement('div'); t.className='teacher'; t.textContent=step.text; c.appendChild(t);
-  await Audio.speak('harold',step.text);
-  if(step.word){
-    const r=document.createElement('div'); r.className='reveal'; c.appendChild(r);
-    await Audio.jingtao(zhText(step.word));
-    r.appendChild(renderSent(step.word,true)); requestAnimationFrame(()=>r.classList.add('show'));
-    logWords(step);
-  }
-  c.appendChild(controlsBar([
-    {label:'▶ Harold',fn:()=>Audio.speak('harold',step.text)},
-    step.word?{label:'▶ Jingtao',cls:'primary',fn:()=>Audio.jingtao(zhText(step.word))}:null,
-    step.word?{label:'▶ slow',cls:'slow',fn:()=>Audio.jingtao(zhText(step.word),{slow:true})}:null,
-    {label:'next →',cls:'primary',fn:advance}
-  ].filter(Boolean)));
-}
-async function renderTeach(step){
-  const c=card();
-  c.innerHTML=`<div class="who">Harold</div><div class="teacher">${step.text}</div>`;
-  await Audio.speak('harold',step.text);
-  c.appendChild(controlsBar([{label:'▶ Harold',fn:()=>Audio.speak('harold',step.text)},{label:'▶ slow',cls:'slow',fn:()=>Audio.speak('harold',step.text,{slow:true})},{label:'next →',cls:'primary',fn:advance}]));
-}
-async function renderExchange(step,firstView){
-  const c=card();
-  for(const line of step.lines){
-    if(line.who==='pause'){ await pauseBar(!firstView); continue; }
-    if(line.who==='jingtao'){
-      const r=document.createElement('div'); r.className='reveal'; c.appendChild(r);
-      await Audio.jingtao(zhText(line.syl));
-      r.appendChild(renderSent(line.syl,true)); requestAnimationFrame(()=>r.classList.add('show'));
-      continue;
-    }
-    const isT=line.who==='Harold';
-    const d=document.createElement('div'); d.className=isT?'':'student';
-    d.innerHTML=`<div class="who">${line.who}</div><div class="${isT?'teacher':''}">${isT?line.t:'<b>'+line.who+'</b>: '+line.t}</div>`;
-    c.appendChild(d);
-    const role=line.who==='Harold'?'harold':(line.who==='Sarah'?'sarah':'james');
-    await Audio.speak(role,line.t);
-  }
-  logWords(step);
-  c.appendChild(controlsBar([
-    {label:'▶ replay',fn:async()=>{ for(const l of step.lines){ if(l.who==='pause'){await new Promise(r=>setTimeout(r,700));continue;} if(l.who==='jingtao'){await Audio.jingtao(zhText(l.syl));continue;} await Audio.speak(l.who==='Harold'?'harold':l.who==='Sarah'?'sarah':'james',l.t);} }},
-    {label:'next →',cls:'primary',fn:advance}
-  ]));
-}
-async function renderDrill(step,firstView){
-  const c=card();
-  const e=document.createElement('div'); e.className='eng'; e.textContent='“'+step.en+'”'; c.appendChild(e);
-  const th=document.createElement('div'); th.className='teacher'; th.textContent='Build it. Then Jingtao will confirm.'; c.appendChild(th);
-  await Audio.speak('harold',step.en);
-  await pauseBar(!firstView);
-  const zh=zhText(step.syl,step.end);
-  await Audio.jingtao(zh);
-  await new Promise(r=>setTimeout(r,500));
-  const r=document.createElement('div'); r.className='reveal'; c.appendChild(r);
-  r.appendChild(renderSent(step.syl,true)); requestAnimationFrame(()=>r.classList.add('show'));
-  logWords(step);
-  if(step.note){ const n=document.createElement('div'); n.className='teacher'; n.style.marginTop='10px'; n.textContent=step.note; r.appendChild(n); await Audio.speak('harold',step.note); }
-  c.appendChild(controlsBar([
-    {label:'▶ Harold',fn:()=>Audio.speak('harold',step.en)},
-    {label:'▶ slow',cls:'slow',fn:()=>Audio.speak('harold',step.en,{slow:true})},
-    {label:'▶ Jingtao',cls:'primary',fn:()=>Audio.jingtao(zh)},
-    {label:'▶ slow',cls:'slow',fn:()=>Audio.jingtao(zh,{slow:true})},
-    {label:'next →',cls:'primary',fn:advance}
-  ]));
-}
+function setProg(){ const L=LESSONS[state.li]; document.getElementById('prog').textContent=`Lesson ${L.id} of 9 — ${L.title}`; }
+function sayBtn(label,fn){ const b=document.createElement('button'); b.className='say'; b.innerHTML=label; b.onclick=fn; return b; }
 
-async function renderTones(){
-  const c=card();
-  c.innerHTML=`<div class="who">Harold</div><div class="teacher">Same mouth position. Four completely different words. Colour and gesture — your body will remember, not just your brain.</div>`;
-  const demo=document.createElement('div'); demo.className='tone-demo'; c.appendChild(demo);
-  const rows=[[1,'mā','妈','mother'],[2,'má','麻','hemp'],[3,'mǎ','马','horse'],[4,'mà','骂','scold']];
-  rows.forEach(([t,py,ch,en])=>{
+function teachLine(who,text,role){
+  const line=document.createElement('div'); line.className='line';
+  line.appendChild(sayBtn(PLAY,()=>Audio.speak(role,text)));
+  const t=document.createElement('div'); t.className=(who==='Harold'?'teacher':'student');
+  t.innerHTML=(who==='Harold'?'':'<b>'+who+'</b>: ')+text;
+  line.appendChild(t); return line;
+}
+function blkTeach(who,text,role){ const d=document.createElement('div'); d.className='blk'; d.appendChild(teachLine(who,text,role)); return d; }
+function zhRow(arr){
+  const w=document.createElement('div'); w.className='zh-row'; w.appendChild(renderSent(arr,false));
+  const zh=zhText(arr); const mini=document.createElement('div'); mini.className='mini';
+  mini.appendChild(sayBtn(PLAY+' hear',()=>Audio.jingtao(zh)));
+  mini.appendChild(sayBtn('slower',()=>Audio.jingtao(zh,{slow:true})));
+  w.appendChild(mini); return w;
+}
+function blkTones(){
+  const d=document.createElement('div'); d.className='blk';
+  d.appendChild(teachLine('Harold','Same mouth position. Four completely different words. The colour and the hand shape become your memory, not just your brain.','harold'));
+  const demo=document.createElement('div'); demo.className='tone-demo'; d.appendChild(demo);
+  [[1,'mā','妈','mother'],[2,'má','麻','hemp'],[3,'mǎ','马','horse'],[4,'mà','骂','scold']].forEach(([t,py,ch,en])=>{
     const row=document.createElement('div'); row.className='tone-row';
-    row.innerHTML=`<div>${gesture(t,54)}</div>`+
-      `<div class="lab"><div class="py zh" style="color:${TC[t]}">${py} <span class="ch">${ch}</span></div><small>${TNAME[t]} · ${en}</small></div>`+
-      `<div>${pitchCurve(t)}</div>`+
-      `<button class="ctl primary">${PLAY}</button>`;
-    row.querySelector('button').onclick=()=>Audio.jingtao(ch);
-    row.querySelector('.gest,div').onclick;
+    row.innerHTML=`<div>${gesture(t,54)}</div><div class="lab"><div class="py zh" style="color:${TC[t]}">${py} <span class="ch">${ch}</span></div><small>${TNAME[t]} · ${en}</small></div><div>${pitchCurve(t)}</div>`;
+    const b=document.createElement('button'); b.className='say'; b.innerHTML=PLAY; b.onclick=()=>Audio.jingtao(ch); row.appendChild(b);
     demo.appendChild(row);
   });
-  await Audio.speak('harold','Same mouth position. Four completely different words.');
-  for(const [,,ch] of rows){ await Audio.jingtao(ch); await new Promise(r=>setTimeout(r,250)); }
-  c.appendChild(controlsBar([{label:'play all four',fn:async()=>{for(const [,,ch] of rows){await Audio.jingtao(ch);await new Promise(r=>setTimeout(r,250));}}},{label:'next →',cls:'primary',fn:advance}]));
+  return d;
 }
-function renderWordOrderStep(){
-  buildWODiagram();
-  const c=card();
-  c.innerHTML=`<div class="who">Harold</div><div class="teacher">Here is the architecture of a Mandarin sentence. Subject — then Time — then Place — then Verb — then Object. Wǒ míngtiān zài jiā chī fàn. I, tomorrow, at home, eat, food. Once you have this pattern, you can build anything.</div>`;
-  const wd=document.createElement('div'); wd.className='wo-diagram'; buildWODiagram(wd); c.appendChild(wd);
-  Audio.speak('harold','Here is the architecture of a Mandarin sentence. Subject, then time, then place, then verb, then object.');
-  c.appendChild(controlsBar([{label:'▶ Harold',fn:()=>Audio.speak('harold','Subject, time, place, verb, object.')},{label:'open full diagram',fn:()=>openOverlay('woOverlay')},{label:'next →',cls:'primary',fn:advance}]));
+function blkWordOrder(){
+  const d=document.createElement('div'); d.className='blk';
+  d.appendChild(teachLine('Harold','Here is the shape of every Mandarin sentence. Subject, then time, then place, then verb, then object. Wǒ míngtiān zài jiā chī fàn — I, tomorrow, at home, eat, food. Once you have this order you can build anything.','harold'));
+  const wd=document.createElement('div'); wd.className='wo-diagram'; buildWODiagram(wd); d.appendChild(wd);
+  return d;
 }
-
-let lastAdvance=0;
-function advance(){
-  const now=(window.performance?performance.now():0);
-  if(now-lastAdvance<600) return; // debounce double-taps -> no overlapping runStep/audio
-  lastAdvance=now;
-  const L=LESSONS[state.li];
-  if(state.si< L.steps.length-1){ state.si++; runStep(); }
-  else{ lessonComplete(); }
-}
-
-/* ============================================================ LESSON COMPLETE */
-function lessonComplete(){
-  const L=LESSONS[state.li];
-  stage.innerHTML='';
-  const c=card();
-  c.innerHTML=`<h2>Lesson ${L.id} complete</h2><div class="sub">You did not memorise a single thing. You built it. Here is everything from this lesson — tap to hear Jingtao.</div>`;
-  const words=(L.intro&&L.intro.length?L.intro:collectLessonWords(L)).filter((v,i,a)=>a.indexOf(v)===i);
-  words.forEach(id=>{ const v=VMAP[id]; if(!v)return; const arr=build(v.parts);
-    const row=document.createElement('div'); row.className='done-word';
-    const s=renderSent(arr,false); s.style.flex='1'; row.appendChild(s);
-    const en=document.createElement('div'); en.className='en'; en.style.color='var(--muted)'; en.style.fontSize='13px'; en.textContent=v.en; row.appendChild(en);
-    const b=document.createElement('button'); b.className='ctl primary'; b.innerHTML=PLAY; b.onclick=()=>Audio.jingtao(zhText(arr)); row.appendChild(b);
-    c.appendChild(row);
+function blkExchange(step){
+  const d=document.createElement('div'); d.className='blk';
+  step.lines.forEach(l=>{
+    if(l.who==='pause'){ const p=document.createElement('div'); p.className='beep'; p.textContent='· · · your turn · · ·'; d.appendChild(p); return; }
+    if(l.who==='jingtao'){ d.appendChild(zhRow(l.syl)); return; }
+    const role=l.who==='Harold'?'harold':(l.who==='Sarah'?'sarah':'james');
+    d.appendChild(teachLine(l.who,l.t,role));
   });
-  if(state.li<LESSONS.length-1){
-    const b=document.createElement('button'); b.className='bigbtn'; b.style.width='100%'; b.style.marginTop='16px';
-    b.textContent=`Start Lesson ${L.id+1} — ${LESSONS[state.li+1].title}`;
-    b.onclick=()=>{ state.li++; state.si=0; unlockLessonWords(state.li); shownStars={bu:false,t3:false}; window._uShown=false; save(LS.lesson,state.li); save(LS.step,0); runStep(); };
-    c.appendChild(b);
-  } else {
-    const d=document.createElement('div'); d.className='teacher'; d.style.marginTop='16px';
-    d.textContent='That is the whole foundation. Nine lessons, and every sentence built from what came before. Go back through the booklet any time.'; c.appendChild(d);
+  return d;
+}
+function blkIntro(step){
+  const d=document.createElement('div'); d.className='blk';
+  d.appendChild(teachLine('Harold',step.text,'harold'));
+  if(step.word) d.appendChild(zhRow(step.word));
+  return d;
+}
+function blkDrill(step,si){
+  const key=state.li+'.'+si; const zh=zhText(step.syl,step.end);
+  const d=document.createElement('div'); d.className='blk drill'; d.id='drill-'+si;
+  const pl=document.createElement('div'); pl.className='line';
+  pl.appendChild(sayBtn(PLAY,()=>Audio.speak('harold',step.en)));
+  const pe=document.createElement('div'); pe.className='eng'; pe.textContent='“'+step.en+'”'; pl.appendChild(pe);
+  d.appendChild(pl);
+  const ansWrap=document.createElement('div');
+  const turn=document.createElement('div'); turn.className='yourturn';
+  turn.innerHTML='<span>Say it in Mandarin, out loud. Then check.</span>';
+  const rev=document.createElement('button'); rev.className='reveal'; rev.textContent='Check answer';
+  turn.appendChild(rev); d.appendChild(turn); d.appendChild(ansWrap);
+  function paint(g){ d.className='blk drill'+(g?' graded-'+g:''); }
+  function reveal(auto){
+    turn.style.display='none';
+    const ans=zhRow(step.syl); ans.classList.add('reveal-in'); ansWrap.appendChild(ans);
+    if(step.note) ansWrap.appendChild(teachLine('Harold',step.note,'harold'));
+    logWords(step,key);
+    if(!auto) Audio.jingtao(zh);
+    const gl=document.createElement('div'); gl.className='glabel'; gl.textContent='How did you do?'; ansWrap.appendChild(gl);
+    const g=document.createElement('div'); g.className='grade';
+    [['correct','Got it'],['nearly','Nearly'],['missed','Missed it']].forEach(([k,lab])=>{
+      const b=document.createElement('button'); b.className='gbtn g-'+k; b.textContent=lab;
+      b.onclick=()=>{ grades[key]=k; save('mt_grades',grades); recordGrade(step,k); paint(k); g.querySelectorAll('.gbtn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); updateTally(); };
+      g.appendChild(b);
+    });
+    ansWrap.appendChild(g);
+    if(grades[key]){ const on=g.querySelector('.g-'+grades[key]); if(on)on.classList.add('on'); paint(grades[key]); }
+  }
+  rev.onclick=()=>reveal(false);
+  if(grades[key]) reveal(true);
+  return d;
+}
+
+function recordGrade(step,g){
+  if((g==='missed'||g==='nearly') && step.syl){
+    const chars=step.syl.map(s=>s.c).join('');
+    VOCAB.forEach(v=>{ const wc=build(v[2]).map(x=>x.c).join(''); if(wc&&chars.includes(wc)&&wordlog[v[0]]) wordlog[v[0]].lastSeen=Math.max(0,promptCounter-25); });
+    save(LS.wordlog,wordlog);
   }
 }
-function collectLessonWords(L){ const out=[]; L.steps.forEach(s=>{ if(s.syl){ VOCAB.forEach(v=>{ const wc=build(v[2]).map(x=>x.c).join(''); if(wc&&s.syl.map(x=>x.c).join('').includes(wc))out.push(v[0]); }); } }); return out; }
+function tallyText(){ const L=LESSONS[state.li]; let c=0,n=0,m=0,tot=0;
+  L.steps.forEach((s,si)=>{ if(s.type==='drill'){ tot++; const g=grades[state.li+'.'+si]; if(g==='correct')c++; else if(g==='nearly')n++; else if(g==='missed')m++; } });
+  return `Drills: ${c} got it · ${n} nearly · ${m} missed · ${tot-c-n-m} not yet checked (of ${tot})`;
+}
+function updateTally(){ const el=document.getElementById('tallyBox'); if(el)el.textContent=tallyText(); }
+
+function blkComplete(L){
+  const d=document.createElement('div'); d.className='blk';
+  d.innerHTML=`<h2>End of Lesson ${L.id}</h2><div class="sub">You built every sentence from what you already had. Tap any word to hear it again.</div>`;
+  const tb=document.createElement('div'); tb.className='tally'; tb.id='tallyBox'; tb.textContent=tallyText(); d.appendChild(tb);
+  (L.intro||[]).filter((v,i,a)=>a.indexOf(v)===i).forEach(id=>{ const v=VMAP[id]; if(!v)return; const arr=build(v.parts);
+    const row=document.createElement('div'); row.className='done-word';
+    const s=renderSent(arr,false); s.style.flex='1'; row.appendChild(s);
+    const en=document.createElement('div'); en.className='en'; en.textContent=v.en; row.appendChild(en);
+    row.appendChild(sayBtn(PLAY,()=>Audio.jingtao(zhText(arr)))); d.appendChild(row);
+  });
+  const missed=[]; L.steps.forEach((s,si)=>{ const g=grades[state.li+'.'+si]; if(s.type==='drill'&&(g==='missed'||g==='nearly'))missed.push(si); });
+  if(missed.length){ const b=document.createElement('button'); b.className='reveal'; b.style.marginTop='12px';
+    b.textContent=`Jump to the ${missed.length} you didn't nail`;
+    b.onclick=()=>{ const el=document.getElementById('drill-'+missed[0]); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); }; d.appendChild(b); }
+  if(state.li<LESSONS.length-1){ const b=document.createElement('button'); b.className='bigbtn next-lesson';
+    b.textContent=`Start Lesson ${L.id+1} — ${LESSONS[state.li+1].title}`;
+    b.onclick=()=>{ renderLesson(state.li+1); window.scrollTo(0,0); }; d.appendChild(b); }
+  else { const t=document.createElement('div'); t.className='teacher'; t.style.marginTop='12px'; t.textContent='That is the whole Foundation. Every sentence built from what came before. The booklet, top right, holds every word you have met.'; d.appendChild(t); }
+  return d;
+}
+
+function renderLesson(li,resumeNote){
+  if(li<0)li=0; if(li>=LESSONS.length)li=LESSONS.length-1;
+  state.li=li; state.si=0; save(LS.lesson,li);
+  unlockLessonWords(li); shownStars={bu:false,t3:false}; window._uShown=false; loggedSteps=new Set();
+  const L=LESSONS[li]; stage.innerHTML=''; setProg(); if(DEBUG)renderDebug();
+  const head=document.createElement('div'); head.className='lesson-head';
+  head.innerHTML=`<div class="prog2">Lesson ${L.id} of 9</div><h2>${L.title}</h2><div class="sub">Read down the page and tap any line to hear it. At each “your turn”, say it in Mandarin out loud, then check and mark how you did.</div>`;
+  stage.appendChild(head);
+  if(resumeNote){ const w=document.createElement('div'); w.className='wbanner'; w.textContent=resumeNote; stage.appendChild(w); }
+  L.steps.forEach((step,si)=>{
+    let blk=null;
+    if(step.type==='tones')blk=blkTones();
+    else if(step.type==='intro')blk=blkIntro(step);
+    else if(step.type==='teach')blk=blkTeach('Harold',step.text,'harold');
+    else if(step.type==='exchange')blk=blkExchange(step);
+    else if(step.type==='wordorder')blk=blkWordOrder();
+    else if(step.type==='drill')blk=blkDrill(step,si);
+    if(blk)stage.appendChild(blk);
+  });
+  stage.appendChild(blkComplete(L));
+}
 
 /* ============================================================ WORD ORDER DIAGRAM */
 const WO_SLOTS=[['Subject','wo'],['Time','mingtian'],['Place','zai jia'],['Verb','chi'],['Object','fan']];
@@ -967,22 +974,6 @@ function renderDebug(){
   d.innerHTML=`<b>DEBUG</b>  promptCounter=${promptCounter}\n<b>lesson ${L.id}</b> step ${state.si}\n\n<b>SEQUENCE</b>\n${seq}\n\n<b>STALE (20+):</b> ${staleWords().join(', ')||'none'}\n\n<b>WORDLOG</b>\n${wl}\n\n<b>booklet</b> ${booklet.length} words\n<b>tts</b> ${settings.src}`;
 }
 
-/* ============================================================ WELCOME BACK */
-function welcomeBack(){
-  const L=LESSONS[state.li];
-  const id=(lastWordId&&VMAP[lastWordId])?lastWordId:((L.intro&&L.intro.length)?L.intro[0]:'nihao');
-  const arr=VMAP[id]?build(VMAP[id].parts):build([niSandhi(),'hao']);
-  stage.innerHTML='';
-  const c=card();
-  c.innerHTML=`<h2>Welcome back</h2><div class="sub">Lesson ${L.id} of 9 · step ${state.si+1}</div>`;
-  const lw=document.createElement('div'); lw.innerHTML='<div class="teacher">Last word you met:</div>'; c.appendChild(lw);
-  c.appendChild(renderSent(arr,false));
-  const en=document.createElement('div'); en.className='teacher'; en.textContent=VMAP[id]?VMAP[id].en:''; c.appendChild(en);
-  c.appendChild(controlsBar([
-    {label:'▶ Jingtao',fn:()=>Audio.jingtao(zhText(arr))},
-    {label:'continue →',cls:'primary',fn:()=>runStep()}
-  ]));
-}
 
 /* ============================================================ INIT */
 function start(){
@@ -990,12 +981,11 @@ function start(){
   Audio.unlock();
   if(typeof speechSynthesis!=='undefined') speechSynthesis.onvoiceschanged=()=>Audio.pickVoices();
   renderGuide();
-  unlockLessonWords(state.li);
-  const resuming = (state.li>0 || state.si>0);
+  const resuming = (state.li>0 || Object.keys(grades).length>0);
   const seenGuide = load(LS.pinyin,false);
-  if(!seenGuide && !resuming){ openOverlay('guideOverlay'); document.getElementById('guideDone').onclick=()=>{ save(LS.pinyin,true); closeOverlay('guideOverlay'); runStep(); }; }
-  else if(resuming){ welcomeBack(); }
-  else { runStep(); }
+  const note = resuming ? `Welcome back — Lesson ${LESSONS[Math.min(state.li,LESSONS.length-1)].id}. Pick up where you left off, or scroll back over anything.` : null;
+  if(!seenGuide && !resuming){ openOverlay('guideOverlay'); document.getElementById('guideDone').onclick=()=>{ save(LS.pinyin,true); closeOverlay('guideOverlay'); renderLesson(0); }; }
+  else { renderLesson(state.li, note); }
   if(DEBUG) renderDebug();
 }
 document.getElementById('beginBtn').onclick=start;

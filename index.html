@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mandarin — the teacher-student method</title>
+<style>
+:root{
+  --bg:#faf9f7; --panel:#ffffff; --text:#232323; --muted:#6b6b6b; --line:#e6e3de;
+  --primary:#232323; --char:#1a1a1a; --t4:#1a1a1a; --accent:#2d8a2d;
+  --shadow:0 6px 24px rgba(0,0,0,.08); --amber:#c47f0b;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#141414; --panel:#1e1e1e; --text:#e9e9e9; --muted:#9a9a9a; --line:#333;
+    --primary:#f2f2f2; --char:#eeeeee; --t4:#cccccc; --shadow:0 6px 24px rgba(0,0,0,.4); }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:16px;line-height:1.5}
+.zh{font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC","Hiragino Sans GB",sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px 120px}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;padding:10px 16px;max-width:640px;margin:0 auto}
+.prog{flex:1;font-size:12.5px;color:var(--muted)}
+.iconbtn{width:40px;height:40px;min-width:40px;border:1px solid var(--line);background:var(--panel);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text)}
+.iconbtn svg{width:20px;height:20px}
+button{font-family:inherit}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;
+  box-shadow:var(--shadow);margin-top:16px}
+.eng{font-size:18px;font-weight:500;color:var(--primary)}
+.teacher{font-size:16px;font-style:italic;color:var(--muted);margin-top:10px}
+.student{font-size:15px;color:var(--muted);margin:8px 0 8px 14px;padding-left:12px;border-left:2px solid var(--line)}
+.student b{font-style:normal;color:var(--text)}
+.who{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.pausewrap{margin:18px 0 6px}
+.pauselabel{font-size:12.5px;color:var(--accent);margin-bottom:6px;transition:opacity .4s}
+.pausebar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;cursor:pointer}
+.pausefill{height:100%;width:0;background:var(--accent);border-radius:3px}
+.reveal{margin-top:16px;opacity:0;transform:translateY(6px);transition:opacity .45s,transform .45s}
+.reveal.show{opacity:1;transform:none}
+.sent{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:flex-end}
+.syl{display:flex;flex-direction:column;align-items:center;position:relative}
+.py{font-size:19px;font-weight:600;line-height:1.15;white-space:nowrap}
+.ch{font-size:28px;color:var(--char);line-height:1.1;margin-top:2px}
+.star{font-size:11px;vertical-align:super;cursor:pointer}
+.gest{margin-top:4px}
+.gest svg{display:block}
+.g-anim{animation:slidein .22s ease-out}
+@keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.ctl{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;
+  padding:9px 12px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px;min-height:44px}
+.ctl svg{width:15px;height:15px}
+.ctl.primary{background:var(--primary);color:var(--bg);border-color:var(--primary);font-weight:600}
+.ctl.slow{opacity:.85}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:none;
+  align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:var(--panel);border-radius:18px;max-width:560px;width:100%;max-height:88vh;
+  overflow:auto;padding:22px;box-shadow:var(--shadow)}
+.panel{position:fixed;top:0;right:0;height:100%;width:min(420px,92vw);background:var(--panel);
+  z-index:60;box-shadow:var(--shadow);transform:translateX(102%);transition:transform .28s;
+  overflow:auto;padding:20px 18px}
+.panel.open{transform:none}
+.panel h2,.modal h2{margin:0 0 4px;font-size:20px}
+.sub{color:var(--muted);font-size:13.5px;margin-bottom:14px}
+.close{position:absolute;top:12px;right:12px}
+.tone-demo{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+.tone-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:12px}
+.tone-row .lab{flex:1}
+.tone-row .lab .py{font-size:26px}
+.tone-row .lab small{color:var(--muted);display:block;font-size:12.5px}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;margin:4px 4px 0 0;min-height:38px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.gcard{border:1px solid var(--line);border-radius:12px;padding:12px}
+.gcard .py{font-size:20px}
+.gcard small{color:var(--muted);font-size:12.5px;display:block;margin:3px 0}
+.gcard .row{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.tick{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;color:transparent}
+.tick.on{color:var(--accent);border-color:var(--accent)}
+.book-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.book-item .en{flex:1;font-size:13.5px;color:var(--muted)}
+input[type=text],input[type=password],input[type=search]{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;background:var(--bg);color:var(--text);font-size:15px;font-family:inherit}
+label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+.banner{position:fixed;left:0;right:0;bottom:0;background:var(--amber);color:#fff;padding:11px 14px;
+  font-size:13.5px;z-index:50;display:none;gap:10px;align-items:center;justify-content:center}
+.banner.show{display:flex}
+.wo-diagram{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.wo-slot{border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;text-align:center;min-width:64px}
+.wo-slot .t{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.wo-slot .w{font-size:15px;font-weight:600;margin-top:3px}
+.wo-arrow{color:var(--muted)}
+.begin{position:fixed;inset:0;background:var(--bg);z-index:80;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:24px}
+.begin h1{font-size:26px;margin:0 0 8px}
+.begin p{color:var(--muted);max-width:420px}
+.bigbtn{margin-top:22px;background:var(--primary);color:var(--bg);border:none;border-radius:14px;
+  padding:16px 30px;font-size:18px;font-weight:600;cursor:pointer;min-height:56px}
+.debug{position:fixed;left:0;top:0;height:100%;width:min(360px,90vw);background:#0c0c0c;color:#8f8;
+  font:12px/1.4 ui-monospace,Menlo,monospace;z-index:70;overflow:auto;padding:12px;display:none}
+.debug.open{display:block}
+.debug b{color:#fd8}
+.tag{display:inline-block;font-size:10.5px;border:1px solid var(--line);border-radius:6px;padding:1px 5px;color:var(--muted);margin-left:6px}
+.tooltip{position:relative}
+.done-word{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.hint{font-size:12px;color:var(--amber);cursor:pointer;border-bottom:1px dotted var(--amber)}
+</style>
+</head>
+<body>
+
+<!-- BEGIN GATE (unlocks audio on gesture) -->
+<div class="begin" id="beginGate">
+  <h1>Mandarin Chinese</h1>
+  <p>The teacher-student method. Harold gives you English, you build the Mandarin, then the native speaker Jingtao confirms it. You never memorise — you construct.</p>
+  <button class="bigbtn" id="beginBtn">Begin lesson</button>
+  <p style="font-size:12.5px;margin-top:18px">Sound required. Uses your browser's voices for English and Google audio for Mandarin.</p>
+</div>
+
+<header>
+  <div class="prog" id="prog">Lesson 1 of 9</div>
+  <button class="iconbtn" id="btnGuide" title="Pronunciation guide" aria-label="Pronunciation guide">?</button>
+  <button class="iconbtn" id="btnWO" title="Sentence order" aria-label="Sentence order">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h7"/></svg></button>
+  <button class="iconbtn" id="btnBook" title="Booklet" aria-label="Booklet">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h9a3 3 0 013 3v11a2 2 0 00-2-2H4zM20 5h-1a3 3 0 00-3 3v11a2 2 0 012-2h2z"/></svg></button>
+  <button class="iconbtn" id="btnSet" title="Settings" aria-label="Settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></button>
+</header>
+
+<div class="wrap" id="stage"></div>
+
+<!-- audio unavailable banner -->
+<div class="banner" id="banner">
+  <span>Mandarin audio unavailable — tap a Chinese word to copy it and hear it in Google Translate.</span>
+</div>
+
+<!-- PANELS / MODALS injected/here -->
+<div class="panel" id="bookPanel">
+  <button class="iconbtn close" data-close="bookPanel">✕</button>
+  <h2>Booklet</h2>
+  <div class="sub">Only what you have met so far. Reference only.</div>
+  <input type="search" id="bookSearch" placeholder="Search pinyin or English">
+  <div id="bookList" style="margin-top:12px"></div>
+</div>
+
+<div class="overlay" id="guideOverlay">
+  <div class="modal" style="position:relative">
+    <button class="iconbtn close" data-close="guideOverlay">✕</button>
+    <h2>Sounds first</h2>
+    <div class="sub">Pinyin is spelled differently from English. Learn these, then the words are easy. Tap any example to hear Jingtao.</div>
+    <div id="guideGrid"></div>
+    <div class="card" style="box-shadow:none">
+      <b>The ü sound</b>
+      <div class="teacher">Say "oo" with your lips pushed forward, but put your tongue where it goes for "ee". No English equivalent. After j, q, x, y it is written as a plain <b>u</b> but it is always ü.</div>
+      <div class="controls">
+        <button class="ctl" data-zh="女" data-py="nǚ">▶ nǚ 女 (ü)</button>
+        <button class="ctl" data-zh="鱼" data-py="yú">▶ yú 鱼 (ü)</button>
+      </div>
+    </div>
+    <button class="bigbtn" style="width:100%;margin-top:16px" id="guideDone">Got the sounds — start Lesson 1</button>
+  </div>
+</div>
+
+<div class="overlay" id="woOverlay">
+  <div class="modal" style="position:relative">
+    <button class="iconbtn close" data-close="woOverlay">✕</button>
+    <h2>How a Mandarin sentence is built</h2>
+    <div class="sub">Subject → Time → Place → Verb → Object. Big picture before small. Tap any slot for words you have met.</div>
+    <div class="wo-diagram" id="woDiagram"></div>
+    <div id="woExamples" class="teacher" style="margin-top:14px"></div>
+  </div>
+</div>
+
+<div class="overlay" id="setOverlay">
+  <div class="modal" style="position:relative">
+    <button class="iconbtn close" data-close="setOverlay">✕</button>
+    <h2>Settings</h2>
+    <div class="sub">By default Mandarin uses free Google audio. You can switch to Azure neural voices with your own key.</div>
+    <label class="f">Mandarin voice source</label>
+    <select id="ttsSource" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)">
+      <option value="google">Google (free, no key)</option>
+      <option value="azure">Azure neural (your key)</option>
+    </select>
+    <label class="f">Azure region (e.g. uksouth, eastus)</label>
+    <input type="text" id="azRegion" placeholder="uksouth">
+    <label class="f">Azure subscription key</label>
+    <input type="password" id="azKey" placeholder="paste key">
+    <label class="f">Azure voice</label>
+    <input type="text" id="azVoice" value="zh-CN-XiaoxiaoNeural" placeholder="zh-CN-XiaoxiaoNeural">
+    <div class="controls">
+      <button class="ctl primary" id="saveSet">Save</button>
+      <button class="ctl" id="testSet">Test Mandarin audio</button>
+    </div>
+    <div class="card" style="box-shadow:none;margin-top:14px">
+      <b>Reset progress</b>
+      <div class="teacher">Clears saved lesson position and word history.</div>
+      <button class="ctl" id="resetAll" style="margin-top:8px">Reset everything</button>
+    </div>
+  </div>
+</div>
+
+<div class="debug" id="debugPanel"></div>
+
+<script>
+"use strict";
+/* ============================================================ TONES + COLOUR */
+const TC={1:'#2d8a2d',2:'#1a5faa',3:'#c0392b',4:'var(--t4)',0:'#888888'};
+const TNAME={1:'Tone 1 — flat high',2:'Tone 2 — rising',3:'Tone 3 — dip then rise',4:'Tone 4 — sharp fall',0:'Neutral — unstressed'};
+
+/* gesture SVG: 1 thumb-out-flat, 2 index-up, 3 V-sign, 4 index-down, 0 fist */
+function gesture(tone,size){
+  const c=TC[tone], s=size, f='#00000000';
+  const fist=`<rect x="9" y="13" width="10" height="9" rx="3" fill="${c}"/>`;
+  let extra='';
+  if(tone===1) extra=`<rect x="1" y="15" width="9" height="4.5" rx="2.2" fill="${c}"/>`; // thumb sideways flat
+  else if(tone===2) extra=`<rect x="11.5" y="2" width="4.5" height="12" rx="2.2" fill="${c}"/>`; // index up
+  else if(tone===3) extra=`<rect x="9" y="2" width="4.2" height="12" rx="2.1" fill="${c}"/><rect x="15" y="2" width="4.2" height="12" rx="2.1" fill="${c}"/>`; // V
+  else if(tone===4) extra=`<rect x="11.5" y="10" width="4.5" height="14" rx="2.2" fill="${c}"/>`; // index down
+  // neutral(0): just fist
+  return `<svg viewBox="0 0 24 26" width="${s}" height="${s*26/24}" aria-hidden="true">${extra}${fist}</svg>`;
+}
+function pitchCurve(tone){
+  const c=TC[tone];const P={1:'2,8 46,8',2:'2,22 46,4',3:'2,10 16,24 46,4',4:'2,4 46,24'}[tone];
+  return `<svg viewBox="0 0 48 28" width="60" height="34"><polyline points="${P}" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+/* ============================================================ SYLLABLES
+   key -> {p:pinyin(with diacritic), t:tone, c:character}. u2y flag = u is really ü. */
+const SYL={
+ wo:{p:'wǒ',t:3,c:'我'}, ni:{p:'nǐ',t:3,c:'你'}, ta:{p:'tā',t:1,c:'他'},
+ men:{p:'men',t:0,c:'们'},
+ shi:{p:'shì',t:4,c:'是'}, bu:{p:'bù',t:4,c:'不'}, hao:{p:'hǎo',t:3,c:'好'},
+ hen:{p:'hěn',t:3,c:'很'}, dui:{p:'duì',t:4,c:'对'},
+ xie:{p:'xiè',t:4,c:'谢'}, ke:{p:'kè',t:4,c:'客'}, qi:{p:'qi',t:0,c:'气'},
+ ma:{p:'ma',t:0,c:'吗'}, de:{p:'de',t:0,c:'的'},
+ ren:{p:'rén',t:2,c:'人'}, guo:{p:'guó',t:2,c:'国'},
+ ying:{p:'Yīng',t:1,c:'英'}, mei:{p:'Měi',t:3,c:'美'}, zhong:{p:'Zhōng',t:1,c:'中'},
+ fa:{p:'Fǎ',t:3,c:'法'}, ri:{p:'Rì',t:4,c:'日'}, ben:{p:'běn',t:3,c:'本'}, de2:{p:'Dé',t:2,c:'德'},
+ ao:{p:'Ào',t:4,c:'澳'}, da:{p:'dà',t:4,c:'大'}, li:{p:'lì',t:4,c:'利'}, ya:{p:'yà',t:4,c:'亚'},
+ xiang:{p:'xiǎng',t:3,c:'想'}, yao:{p:'yào',t:4,c:'要'}, xi:{p:'xǐ',t:3,c:'喜'}, huan:{p:'huān',t:1,c:'欢'},
+ chi:{p:'chī',t:1,c:'吃'}, he:{p:'hē',t:1,c:'喝'}, shuo:{p:'shuō',t:1,c:'说'}, wen:{p:'wén',t:2,c:'文'},
+ fan:{p:'fàn',t:4,c:'饭'}, jia:{p:'jiā',t:1,c:'家'},
+ qu:{p:'qù',t:4,c:'去',u2y:true}, lai:{p:'lái',t:2,c:'来'}, hui:{p:'huí',t:2,c:'回'}, zai:{p:'zài',t:4,c:'在'},
+ xian:{p:'xiàn',t:4,c:'现'}, jin:{p:'jīn',t:1,c:'今'}, tian:{p:'tiān',t:1,c:'天'},
+ ming:{p:'míng',t:2,c:'明'}, zuo2:{p:'zuó',t:2,c:'昨'},
+ you:{p:'yǒu',t:3,c:'有'}, meiN:{p:'méi',t:2,c:'没'}, gong:{p:'gōng',t:1,c:'工'}, zuo:{p:'zuò',t:4,c:'作'},
+ xue:{p:'xué',t:2,c:'学'}, xiP:{p:'xí',t:2,c:'习'}, shi2:{p:'shí',t:2,c:'时'}, jian:{p:'jiān',t:1,c:'间'},
+ yi1:{p:'yī',t:1,c:'一'}, er:{p:'èr',t:4,c:'二'}, san:{p:'sān',t:1,c:'三'}, si:{p:'sì',t:4,c:'四'},
+ wu:{p:'wǔ',t:3,c:'五'}, liu:{p:'liù',t:4,c:'六'}, qiN:{p:'qī',t:1,c:'七'}, ba8:{p:'bā',t:1,c:'八'},
+ jiu:{p:'jiǔ',t:3,c:'九'}, shi10:{p:'shí',t:2,c:'十'},
+ liang:{p:'liǎng',t:3,c:'两'}, ge:{p:'gè',t:0,c:'个'},
+ dian:{p:'diǎn',t:3,c:'点'}, ban:{p:'bàn',t:4,c:'半'}, ji:{p:'jǐ',t:3,c:'几'},
+ dou:{p:'dōu',t:1,c:'都'}, hai:{p:'hái',t:2,c:'还'}, jiu4:{p:'jiù',t:4,c:'就'}, ba:{p:'ba',t:0,c:'吧'},
+ zao:{p:'zǎo',t:3,c:'早'},
+ neng:{p:'néng',t:2,c:'能'}, hui4:{p:'huì',t:4,c:'会'}, yi3:{p:'yǐ',t:3,c:'以',u2y:false},
+ zhe:{p:'zhè',t:4,c:'这'}, dan:{p:'dàn',t:4,c:'但'}
+};
+// sandhi-baked inline syllables for the two fixed tone3+tone3 words
+function niSandhi(){return {p:'ní',t:2,c:'你',sandhi:{type:'t3',from:'nǐ (tone 3)',to:'ní (tone 2)',why:'two tone-3 syllables together — the first becomes tone 2'}};}
+function keSandhi(){return {p:'ké',t:2,c:'可',sandhi:{type:'t3',from:'kě (tone 3)',to:'ké (tone 2)',why:'two tone-3 syllables together — the first becomes tone 2'}};}
+
+/* build a syllable list from mixed keys/objects, then apply bù-sandhi (tone4 before tone4 -> tone2) */
+function build(parts){
+  const arr=parts.map(p=> typeof p==='string' ? Object.assign({},SYL[p],{_k:p}) : Object.assign({},p));
+  for(let i=0;i<arr.length;i++){
+    const s=arr[i], nx=arr[i+1];
+    if(s._k==='bu' && nx && nx.t===4){
+      s.p='bú'; s.t=2; s.sandhi={type:'bu',from:'bù (tone 4)',to:'bú (tone 2)',why:'when tone 4 meets tone 4, the first becomes tone 2'};
+    }
+  }
+  return arr;
+}
+/* chinese string for TTS (uses characters, chinese punctuation added by caller) */
+function zhText(arr,trailing){ return arr.map(s=>s.c).join('') + (trailing||''); }
+/* pinyin join with apostrophe before a/e/o that follows a syllable */
+function pyJoin(arr){
+  let out='';
+  arr.forEach((s,i)=>{
+    let p=s.p;
+    if(i>0 && /^[aeoAEO]/.test(p)) out+="'";
+    else if(i>0) out+=' ';
+    out+=p;
+  });
+  return out;
+}
+
+/* ============================================================ CONTENT HELPERS */
+function D(en,parts,note,end){ return {type:'drill',en,syl:build(parts),note:note||'',end:end||'。'}; }
+function EX(lines){ return {type:'exchange',lines}; }
+function TEACH(text){ return {type:'teach',text}; }
+function INTRO(text,word){ return {type:'intro',text,word:word?build(word):null}; }
+function WORD(parts,en,extra){ return Object.assign({syl:build(parts),en},extra||{}); }
+
+/* Vocabulary meta for booklet (introduced per lesson). key -> {parts, en} */
+const VOCAB=[
+ ['hao','good',['hao']],['buhao','not good',['bu','hao']],['hen','very',['hen']],
+ ['nihao','hello',[niSandhi(),'hao']],['shi','is / am / are',['shi']],['bushi','is not',['bu','shi']],
+ ['bu','not',['bu']],['dui','correct',['dui']],['budui','incorrect',['bu','dui']],
+ ['xiexie','thank you',['xie','xie']],['bukeqi',"you're welcome",['bu','ke','qi']],
+ ['wo','I / me',['wo']],['ni','you',['ni']],['ta','he / she',['ta']],
+ ['women','we',['wo','men']],['nimen','you (plural)',['ni','men']],['tamen','they',['ta','men']],
+ ['ma','question particle',['ma']],['de','possessive 的',['de']],
+ ['ren','person',['ren']],['guo','country',['guo']],
+ ['yingguo','Britain',['ying','guo']],['meiguo','America',['mei','guo']],['zhongguo','China',['zhong','guo']],
+ ['faguo','France',['fa','guo']],['riben','Japan',['ri','ben']],['deguo','Germany',['de2','guo']],
+ ['aodaliya','Australia',['ao','da','li','ya']],
+ ['xiang','would like',['xiang']],['yao','want / need',['yao']],['xihuan','like',['xi','huan']],
+ ['chi','eat',['chi']],['he','drink',['he']],['shuo','speak',['shuo']],
+ ['zhongwen','Chinese language',['zhong','wen']],['yingwen','English language',['ying','wen']],
+ ['fan','food / meal',['fan']],['jia','home / family',['jia']],
+ ['qu','go',['qu']],['lai','come',['lai']],['hui','return',['hui']],['zai','at / in',['zai']],
+ ['xianzai','now',['xian','zai']],['jintian','today',['jin','tian']],['mingtian','tomorrow',['ming','tian']],['zuotian','yesterday',['zuo2','tian']],
+ ['you','have',['you']],['meiyou',"don't have",['meiN','you']],
+ ['gongzuo','work / job',['gong','zuo']],['xuexi','study',['xue','xiP']],['shijian','time',['shi2','jian']],
+ ['dian',"o'clock",['dian']],['ban','half',['ban']],['ji','how many',['ji']],
+ ['liang','two (of things)',['liang']],['ge','measure word',['ge']],
+ ['dou','all / both',['dou']],['hai','still / also',['hai']],['jiu','then',['jiu4']],['ba','suggestion 吧',['ba']],['zao','early',['zao']],
+ ['neng','can (ability)',['neng']],['hui2','can (skill)',['hui4']],['keyi','may / can',[keSandhi(),'yi3']],
+ ['zhege','this one',['zhe','ge']],['danshi','but',['dan','shi']],
+ ['yi1','one',['yi1']],['er','two (number)',['er']],['san','three',['san']],['si','four',['si']],['wu','five',['wu']],
+ ['liu','six',['liu']],['qiN','seven',['qiN']],['ba8','eight',['ba8']],['jiu','nine',['jiu']],['shi10','ten',['shi10']]
+];
+const VMAP={}; VOCAB.forEach(v=>VMAP[v[0]]={parts:v[2],en:v[1]});
+
+/* ============================================================ LESSONS */
+const LESSONS=[
+{ id:1, title:'Tones and the engine',
+  intro:['hao','buhao','hen','nihao','shi','bushi','bu','dui','budui'],
+  steps:[
+   {type:'tones'},
+   INTRO("Shì means is, am, are — and it never changes. Shì for I, you, he, she, we, they. No conjugation, ever.",['shi']),
+   INTRO("Bù means not. Put bù before any verb and you have the negative. That is all there is to it.",['bu']),
+   INTRO("Now watch. Bù before shì — tone four meets tone four, so the first becomes tone two. Bú shì. The colour changes to blue. Your mouth does this automatically at speed.",['bu','shi']),
+   EX([
+     {who:'Harold',t:"How would you say 'not good'?"},
+     {who:'pause'},
+     {who:'Sarah',t:"bù... hǎo?"},
+     {who:'Harold',t:"Good — bù hǎo. Hear how bù stayed tone four? Hǎo is tone three — different tones, so no change here."},
+     {who:'jingtao',syl:build(['bu','hao'])}
+   ]),
+   EX([
+     {who:'Harold',t:"Now — 'is not'. Take what you have."},
+     {who:'pause'},
+     {who:'James',t:"bù... shì? bù shì?"},
+     {who:'Harold',t:"Almost — listen to the tone on bù. When tone four meets tone four, the first becomes tone two. Listen to Jingtao."},
+     {who:'jingtao',syl:build(['bu','shi'])},
+     {who:'Harold',t:"Bú shì. The colour becomes blue. Your mouth will do this naturally at speed."}
+   ]),
+   D("Good",['hao']),
+   D("Not good",['bu','hao'],"Different tones, so bù keeps tone four."),
+   D("Very good",['hen','hao'],"Two tone-three words, but in one breath they stay as they are here — hěn hǎo."),
+   D("Hello",[niSandhi(),'hao'],"Nǐ hǎo — literally 'you good'. Two tone threes, so the first becomes tone two."),
+   D("Correct",['dui']),
+   D("Not correct",['bu','dui'],"Duì is tone four, so bù becomes bú again."),
+   D("Is not",['bu','shi']),
+   D("Very good, is it not?",['hen','hao',{p:'shì',t:4,c:'是'},'ma'],"You are already combining — hěn hǎo, shì ma?","？")
+  ]},
+{ id:2, title:'Pronouns and first sentences',
+  intro:['wo','ni','ta','women','nimen','tamen','xiexie','bukeqi'],
+  steps:[
+   INTRO("Wǒ — I, me. Tone three.",['wo']),
+   INTRO("Nǐ — you. Tone three.",['ni']),
+   INTRO("Tā — he or she. Same sound, two characters. Context tells you which. Tone one.",['ta']),
+   INTRO("Add men and it is plural, without exception. Wǒ becomes wǒmen. Nǐ becomes nǐmen. Nothing else changes.",['wo','men']),
+   TEACH("So you already have every sentence: wǒ shì, nǐ shì, tā shì — and the negative wǒ bú shì. You built nothing new, you only combined."),
+   EX([
+     {who:'Harold',t:"How do you say 'we are not'?"},
+     {who:'pause'},
+     {who:'James',t:"Wǒmen... bú shì?"},
+     {who:'Harold',t:"Exactly. Wǒmen bú shì. Same change — bù before shì becomes bú. You are already applying the rule without thinking."},
+     {who:'jingtao',syl:build(['wo','men','bu','shi'])}
+   ]),
+   D("I am",['wo','shi']),
+   D("You are",['ni','shi']),
+   D("He is",['ta','shi']),
+   D("I am not",['wo','bu','shi']),
+   D("You are not",['ni','bu','shi']),
+   D("We are",['wo','men','shi']),
+   D("They are not",['ta','men','bu','shi']),
+   D("Thank you",['xie','xie']),
+   D("You're welcome",['bu','ke','qi'],"Bù kèqi — literally 'not formal'. Don't stand on ceremony.")
+  ]},
+{ id:3, title:'Questions and nationalities',
+  intro:['ma','ren','guo','yingguo','meiguo','zhongguo','faguo','riben','deguo','aodaliya'],
+  steps:[
+   INTRO("Ma turns any statement into a question. No inversion, no word-order change — just ma at the end.",['ma']),
+   INTRO("Rén — person. Guó — country. Two building blocks.",['ren']),
+   TEACH("Country plus rén equals nationality. There is no separate adjective form, ever. Yīngguó plus rén — Yīngguórén. The pattern never breaks."),
+   INTRO("Yīngguó — Britain.",['ying','guo']),
+   INTRO("Měiguó — America.",['mei','guo']),
+   INTRO("Zhōngguó — China. Zhōng means middle.",['zhong','guo']),
+   EX([
+     {who:'Harold',t:"She is not American, she is British. How would you say that?"},
+     {who:'pause'},
+     {who:'Sarah',t:"Tā bú shì Měiguórén... tā shì Yīngguórén?"},
+     {who:'Harold',t:"Perfect. Notice we did not need the word 'but' — the comma does the work. And no word for 'a' or 'the'. Mandarin has none. You do not need them."},
+     {who:'jingtao',syl:build(['ta','bu','shi','mei','guo','ren',{p:',',t:0,c:'，'},'ta','shi','ying','guo','ren'])}
+   ]),
+   EX([
+     {who:'Harold',t:"'Are you Chinese?' — build it."},
+     {who:'pause'},
+     {who:'James',t:"Nǐ shì Zhōngguórén ma?"},
+     {who:'Harold',t:"Exactly. Statement plus ma. You did not change a single word — you added one."},
+     {who:'jingtao',syl:build(['ni','shi','zhong','guo','ren','ma'])}
+   ]),
+   D("Are you British?",['ni','shi','ying','guo','ren','ma'],null,"？"),
+   D("I am not American, I am British",['wo','bu','shi','mei','guo','ren',{p:',',t:0,c:'，'},'wo','shi','ying','guo','ren']),
+   D("Is she Chinese?",['ta','shi','zhong','guo','ren','ma'],null,"？"),
+   D("We are not French",['wo','men','bu','shi','fa','guo','ren']),
+   D("They are all Japanese",['ta','men','dou','shi','ri','ben','ren'],"Dōu means all — it sits before the verb."),
+   D("Are you German?",['ni','shi','de2','guo','ren','ma'],null,"？")
+  ]},
+{ id:4, title:'Want, like, and possession',
+  intro:['de','xiang','yao','xihuan','chi','he','shuo','zhongwen','yingwen','fan','dou'],
+  steps:[
+   {type:'wordorder'},
+   INTRO("De turns what comes before it into a possessive. Wǒ de — my. Nǐ de — your. Tā de — his or her.",['wo','de']),
+   INTRO("Xiǎng — would like to, thinking of. Soft and polite.",['xiang']),
+   INTRO("Yào — want, need, going to. Direct and strong.",['yao']),
+   TEACH("Use xiǎng when you want to sound polite, yào when you mean business. Xǐhuān is to like or enjoy."),
+   INTRO("Wén means language. Zhōngwén — Chinese. Yīngwén — English.",['zhong','wen']),
+   EX([
+     {who:'Harold',t:"How do you say 'I would like to speak Chinese'?"},
+     {who:'pause'},
+     {who:'James',t:"Wǒ xiǎng... shuō... zhōngwén?"},
+     {who:'Harold',t:"Exactly right. Subject — want — verb — object. The structure carries everything."},
+     {who:'jingtao',syl:build(['wo','xiang','shuo','zhong','wen'])}
+   ]),
+   EX([
+     {who:'Harold',t:"'Is this your home?' Use de."},
+     {who:'pause'},
+     {who:'Sarah',t:"Zhège shì nǐ de jiā ma?"},
+     {who:'Harold',t:"Beautiful. De links you to the home — your home. Nǐ de jiā."},
+     {who:'jingtao',syl:build(['zhe','ge','shi','ni','de','jia','ma'])}
+   ]),
+   D("My home",['wo','de','jia']),
+   D("Your work",['ni','de','gong','zuo']),
+   D("I would like to eat",['wo','xiang','chi']),
+   D("Do you want to drink?",['ni','yao','he','ma'],null,"？"),
+   D("She likes to speak Chinese",['ta','xi','huan','shuo','zhong','wen']),
+   D("I don't want to",['wo','bu','yao'],"Yào is tone four, so bù becomes bú — bú yào."),
+   D("Do you like Chinese food?",['ni','xi','huan','chi','zhong','guo','fan','ma'],null,"？")
+  ]},
+{ id:5, title:'Going, coming, time',
+  intro:['qu','lai','hui','zai','xianzai','jintian','mingtian','zuotian'],
+  steps:[
+   INTRO("Qù — go. Lái — come. Huí — return, go back.",['qu']),
+   INTRO("Zài sits before a location. Wǒ zài jiā — I am at home.",['zai']),
+   TEACH("There is no past tense and no future tense. The verb never changes. The time word tells you when. Zuótiān wǒ qù — yesterday I went. Míngtiān wǒ qù — tomorrow I will go."),
+   INTRO("Míngtiān — tomorrow. Time comes before place: Subject, Time, Place, Verb, Object.",['ming','tian']),
+   EX([
+     {who:'Harold',t:"'Yesterday she went home' — how do you say that?"},
+     {who:'pause'},
+     {who:'Sarah',t:"Tā... zuótiān... huí jiā?"},
+     {who:'Harold',t:"Right — tā zuótiān huí jiā. No past-tense verb. Zuótiān does all the work."},
+     {who:'jingtao',syl:build(['ta','zuo2','tian','hui','jia'])}
+   ]),
+   D("I am going home",['wo','hui','jia']),
+   D("Are you going tomorrow?",['ni','ming','tian','qu','ma'],null,"？"),
+   D("She came yesterday",['ta','zuo2','tian','lai']),
+   D("We are at home now",['wo','men','xian','zai','zai','jia']),
+   D("I want to go home",['wo','xiang','hui','jia']),
+   D("Is she coming today?",['ta','jin','tian','lai','ma'],null,"？"),
+   D("I am not going tomorrow",['wo','ming','tian','bu','qu'])
+  ]},
+{ id:6, title:'Have and there is',
+  intro:['you','meiyou','gongzuo','xuexi','shijian'],
+  steps:[
+   INTRO("Yǒu — have, there is. Tone three.",['you']),
+   TEACH("Yǒu is the one verb in Mandarin never negated with bù. Always méiyǒu. Never bù yǒu. This is the single exception and it is absolute."),
+   EX([
+     {who:'Harold',t:"'I don't have work' — how do you say that?"},
+     {who:'pause'},
+     {who:'James',t:"Wǒ bù yǒu gōngzuò?"},
+     {who:'Harold',t:"Close — but yǒu is the one verb that never takes bù. It takes méi. Méiyǒu. Say it with me."},
+     {who:'jingtao',syl:build(['meiN','you'])},
+     {who:'Harold',t:"Wǒ méiyǒu gōngzuò."},
+     {who:'jingtao',syl:build(['wo','meiN','you','gong','zuo'])}
+   ]),
+   D("I have work",['wo','you','gong','zuo']),
+   D("Do you have work tomorrow?",['ni','ming','tian','you','gong','zuo','ma'],null,"？"),
+   D("She doesn't have work today",['ta','jin','tian','meiN','you','gong','zuo']),
+   D("I want to study Chinese",['wo','xiang','xue','xiP','zhong','wen']),
+   D("They don't have time",['ta','men','meiN','you','shi2','jian']),
+   D("Do you have time today?",['ni','jin','tian','you','shi2','jian','ma'],null,"？"),
+   D("I don't have time, I have work",['wo','meiN','you','shi2','jian',{p:',',t:0,c:'，'},'wo','you','gong','zuo'])
+  ]},
+{ id:7, title:'Time, numbers, measure words',
+  intro:['ji','dian','ban','yi1','er','san','si','wu','liu','qiN','ba8','jiu','shi10','liang','ge','dou','hai','jiu','ba','zao'],
+  steps:[
+   INTRO("Diǎn — o'clock. Bàn — half. Jǐ diǎn — what time.",['ji','dian']),
+   TEACH("The numbers for the clock: yī, èr, sān, sì, wǔ, liù, qī, bā, jiǔ, shí. Ten is shí; eleven is shí-yī; twelve is shí-èr."),
+   INTRO("Now the trap. Two has two forms. Èr is the number itself. Liǎng is two of something.",['liang']),
+   TEACH("Every noun needs a counter between the number and the noun. Gè is the general one. Liǎng gè rén — two people. Never èr gè. This catches everyone. Now it won't catch you."),
+   EX([
+     {who:'Harold',t:"'Two people' — use what you have."},
+     {who:'pause'},
+     {who:'James',t:"Liǎng gè rén?"},
+     {who:'Harold',t:"Exactly. Liǎng — not èr. Two of something is always liǎng, with its counter gè."},
+     {who:'jingtao',syl:build(['liang','ge','ren'])}
+   ]),
+   D("What time is it?",['xian','zai','ji','dian'],null,"？"),
+   D("Three o'clock",['san','dian']),
+   D("Half past three",['san','dian','ban']),
+   D("Two people",['liang','ge','ren'],"Liǎng, never èr, before a counter."),
+   D("One home",['yi1','ge','jia']),
+   D("They are all going",['ta','men','dou','qu']),
+   D("Shall we go?",['wo','men','qu','ba'],"Ba turns a statement into a gentle suggestion.","？"),
+   D("It's still early",['hai','zao'],"Hái — still.")
+  ]},
+{ id:8, title:'Three kinds of can',
+  intro:['neng','hui2','keyi','zhege','danshi'],
+  steps:[
+   TEACH("Three different cans. Néng — are you physically able, do circumstances allow? Huì — have you learned the skill? Kěyǐ — is it permitted, may you?"),
+   INTRO("Huì — can, in the sense of a learned skill. Also 'will'.",['hui2']),
+   INTRO("Kěyǐ — may, allowed to. Two tone threes, so kě becomes tone two: kéyǐ.",[keSandhi(),'yi3']),
+   INTRO("Zhège — this one. Dànshì — but, however.",['zhe','ge']),
+   EX([
+     {who:'Harold',t:"'Can she speak Chinese?' — meaning does she know how?"},
+     {who:'pause'},
+     {who:'Sarah',t:"Tā... huì shuō zhōngwén ma?"},
+     {who:'Harold',t:"Exactly right — huì, the skill. If you meant physically able, maybe a sore throat, you would use néng instead."},
+     {who:'jingtao',syl:build(['ta','hui2','shuo','zhong','wen','ma'])}
+   ]),
+   D("Can you speak Chinese?",['ni','hui2','shuo','zhong','wen','ma'],"Huì — the learned skill.","？"),
+   D("I can't speak Chinese yet",['wo','hai','bu','hui2','shuo','zhong','wen'],"Bù before huì (tone four) becomes bú."),
+   D("May I go?",[keSandhi(),'yi3','wo'].length?['wo',keSandhi(),'yi3','qu']:[],"Kěyǐ — permission.","？"),
+   D("She can't come today",['ta','jin','tian','bu','neng','lai'],"Néng — circumstances. Bù néng — néng is tone two, bù stays."),
+   D("Can you eat this?",['ni',keSandhi(),'yi3','chi','zhe','ge','ma'],"Kěyǐ — is it okay to.","？"),
+   D("I want to go but I can't",['wo','xiang','qu','dan','shi','bu','neng'])
+  ]},
+{ id:9, title:'Review — building longer',
+  intro:[],
+  steps:[
+   TEACH("No new grammar now. Only building. Everything you say here you already have — you are only combining it into longer shapes."),
+   D("I would like to go home tomorrow",['wo','ming','tian','xiang','hui','jia']),
+   D("We all want to eat now",['wo','men','xian','zai','dou','xiang','chi']),
+   D("She doesn't have work tomorrow, shall we go?",['ta','ming','tian','meiN','you','gong','zuo',{p:',',t:0,c:'，'},'wo','men','qu','ba'],null,"？"),
+   D("Are they all British?",['ta','men','dou','shi','ying','guo','ren','ma'],null,"？"),
+   D("I can't come today, but tomorrow I can",['wo','jin','tian','bu','neng','lai',{p:',',t:0,c:'，'},'dan','shi','ming','tian','neng']),
+   D("Is this your home? It's very good.",['zhe','ge','shi','ni','de','jia','ma'],"Two sentences, all recycled.","？"),
+   D("Two people want to study Chinese",['liang','ge','ren','xiang','xue','xiP','zhong','wen']),
+   D("Do you still have time today?",['ni','jin','tian','hai','you','shi2','jian','ma'],null,"？"),
+   D("They are not British, they are Australian",['ta','men','bu','shi','ying','guo','ren',{p:',',t:0,c:'，'},'ta','men','shi','ao','da','li','ya','ren']),
+   D("May I speak Chinese with you?",['wo',keSandhi(),'yi3',{p:'gēn',t:1,c:'跟'},'ni','shuo','zhong','wen','ma'],"Gēn — with. Your last new link, and the shape is all yours.","？")
+  ]}
+];
+// fix the "May I go?" drill built awkwardly above
+LESSONS[7].steps.find(s=>s.en==="May I go?").syl=build(['wo',keSandhi(),'yi3','qu']);
+
+/* pronunciation guide cards */
+const GUIDE=[
+ ['x','"sh" in sheep, softer','xǐhuān','喜欢'],['q','"ch" in cheap, further forward','qù','去'],
+ ['zh','"j" in jump, tongue curled back','Zhōngguó','中国'],['ch','"ch", retroflex','chī','吃'],
+ ['sh','"sh", retroflex','shì','是'],['r','"r"+"zh", tongue curled','rén','人'],
+ ['c','"ts" in cats','cāi','猜'],['z','"ds" in kids','zài','在'],['j','"j" in jeep, softer','jiā','家'],
+ ['e (alone)','"uh", not "ee"','hěn','很'],['ui','"way"','duì','对'],['ao','"ow" in cow','hǎo','好'],
+ ['ou','"oh" in go','dōu','都'],['ai','"eye"','lái','来'],['ian','"yen"','tiān','天'],
+ ['ü / u after j q x y','"oo" with "ee" tongue','qù','去']
+];
+
+/* ============================================================ STATE */
+const LS={ lesson:'mt_lesson', step:'mt_prompt', wordlog:'mt_wordlog', booklet:'mt_booklet',
+  pinyin:'mt_pinyin_dismissed', settings:'mt_settings', ticks:'mt_ticks' };
+function load(k,d){ try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;} }
+function save(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+
+let state={ li:load(LS.lesson,0), si:load(LS.step,0) };
+let wordlog=load(LS.wordlog,{});
+let booklet=load(LS.booklet,[]);
+let settings=load(LS.settings,{src:'google',region:'',key:'',voice:'zh-CN-XiaoxiaoNeural'});
+let ticks=load(LS.ticks,{});
+let promptCounter=0; Object.values(wordlog).forEach(w=>{if(w.seenCount>promptCounter)promptCounter=w.lastSeen||0;});
+let shownStars={bu:false,t3:false};
+let viewed=new Set();
+const DEBUG=/[?&]debug=1/.test(location.search);
+
+/* ============================================================ AUDIO */
+const Audio={
+  ctx:null, ready:false, voices:{harold:null,sarah:null,james:null}, azureToken:null, azureTokenAt:0,
+  unlock(){
+    try{ this.ctx=new (window.AudioContext||window.webkitAudioContext)(); if(this.ctx.state==='suspended')this.ctx.resume(); }catch(e){}
+    // prime speechSynthesis
+    try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); }catch(e){}
+    this.pickVoices(); this.ready=true;
+  },
+  pickVoices(){
+    const vs=speechSynthesis.getVoices()||[];
+    const byName=(re)=>vs.find(v=>re.test(v.name));
+    const gb=vs.filter(v=>/en-GB/i.test(v.lang)), us=vs.filter(v=>/en-US/i.test(v.lang));
+    const femRe=/(female|samantha|victoria|kate|serena|fiona|zira|susan|ava|allison|joanna|libby|sonia|emma)/i;
+    const malRe=/(male|daniel|alex|fred|david|mark|tom|oliver|arthur|guy|matthew|ryan|george)/i;
+    this.voices.harold = byName(/sonia|libby|arthur|oliver|daniel/i) || gb[0] || vs.find(v=>/en/i.test(v.lang)) || vs[0];
+    this.voices.sarah = us.find(v=>femRe.test(v.name)) || byName(femRe) || us[0] || this.voices.harold;
+    this.voices.james = us.find(v=>malRe.test(v.name)) || byName(malRe) || us.find(v=>v!==this.voices.sarah) || this.voices.harold;
+  },
+  speak(role,text,opt){opt=opt||{};
+    return new Promise(res=>{
+      if(!('speechSynthesis' in window)){res();return;}
+      try{
+        const u=new SpeechSynthesisUtterance(text);
+        const map={harold:['harold',0.85,0.9],sarah:['sarah',0.9,1.05],james:['james',0.9,0.92]};
+        const m=map[role]||map.harold;
+        u.voice=this.voices[m[0]]||null; u.lang=(u.voice&&u.voice.lang)|| (role==='harold'?'en-GB':'en-US');
+        u.rate=opt.slow?0.6:m[1]; u.pitch=m[2];
+        u.onend=res; u.onerror=res;
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+        setTimeout(res, Math.min(9000, 900+text.length*90)); // safety
+      }catch(e){res();}
+    });
+  },
+  googleUrl(text,slow){ let u='https://translate.google.com/translate_tts?ie=UTF-8&q='+encodeURIComponent(text)+'&tl=zh-CN&client=tw-ob'; if(slow)u+='&ttsspeed=0.24'; return u; },
+  youdaoUrl(text){ return 'https://dict.youdao.com/dictvoice?audio='+encodeURIComponent(text)+'&type=1'; },
+  async azure(text){
+    try{
+      const now=Date.now();
+      if(!this.azureToken || now-this.azureTokenAt>8*60*1000){
+        const r=await fetch(`https://${settings.region}.api.cognitive.microsoft.com/sts/v1.0/issueToken`,{method:'POST',headers:{'Ocp-Apim-Subscription-Key':settings.key}});
+        if(!r.ok) throw new Error('token'); this.azureToken=await r.text(); this.azureTokenAt=now;
+      }
+      const ssml=`<speak version='1.0' xml:lang='zh-CN'><voice name='${settings.voice}'>${text.replace(/[<&]/g,'')}</voice></speak>`;
+      const rr=await fetch(`https://${settings.region}.tts.speech.microsoft.com/cognitiveservices/v1`,{method:'POST',
+        headers:{'Authorization':'Bearer '+this.azureToken,'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3'},body:ssml});
+      if(!rr.ok) throw new Error('tts'); const b=await rr.blob(); return URL.createObjectURL(b);
+    }catch(e){ return null; }
+  },
+  jingtao(text,opt){opt=opt||{};
+    return new Promise(async res=>{
+      let srcs=[];
+      if(settings.src==='azure' && settings.key && settings.region){ const u=await this.azure(text); if(u)srcs.push(u); }
+      srcs.push(this.googleUrl(text,opt.slow), this.youdaoUrl(text));
+      let i=0; const a=new Audio2();
+      const tryNext=()=>{ if(i>=srcs.length){ showBanner(text); res(false); return; } a.src=srcs[i++]; a.play().catch(()=>{}); };
+      a.onended=()=>{ hideBanner(); res(true); };
+      a.onerror=tryNext;
+      a.onplaying=()=>hideBanner();
+      tryNext();
+      setTimeout(()=>res(true), 8000);
+    });
+  }
+};
+function Audio2(){ const a=document.createElement('audio'); a.preload='auto'; return a; }
+
+let bannerText='';
+function showBanner(t){ bannerText=t; document.getElementById('banner').classList.add('show'); }
+function hideBanner(){ document.getElementById('banner').classList.remove('show'); }
+document.getElementById('banner').onclick=()=>{ if(bannerText){navigator.clipboard&&navigator.clipboard.writeText(bannerText);} };
+setInterval(()=>{ if(document.getElementById('banner').classList.contains('show')&&bannerText){ Audio.jingtao(bannerText).then(ok=>{if(ok)hideBanner();}); } },30000);
+
+/* ============================================================ RENDER SYLLABLES */
+function renderSent(arr,gestAnim){
+  const wrap=document.createElement('div'); wrap.className='sent zh';
+  arr.forEach((s,idx)=>{
+    if(s.c===','||s.c==='，'||s.c==='。'||s.c==='？'){ // punctuation: attach char only
+      const p=document.createElement('div'); p.className='syl'; p.innerHTML=`<div class="py">&nbsp;</div><div class="ch">${s.c}</div>`; wrap.appendChild(p); return;
+    }
+    const col=TC[s.t];
+    const div=document.createElement('div'); div.className='syl';
+    let star='';
+    if(s.sandhi && !shownStars[s.sandhi.type]){ shownStars[s.sandhi.type]=true; s._star=true; }
+    if(s.sandhi){ star=`<span class="star" style="color:${col}" title="Tone change: ${s.sandhi.from} → ${s.sandhi.to} — ${s.sandhi.why}">★</span>`; }
+    // ü hint
+    let hint='';
+    if(s.u2y && !window._uShown){ window._uShown=true; hint=`<span class="hint" title="This u is actually ü — see the ? guide" style="font-size:10px">ü</span>`; }
+    div.innerHTML=`<div class="py" style="color:${col}">${s.p}${s.sandhi?star:''} ${hint}</div>`+
+      `<div class="ch">${s.c}</div>`+
+      `<div class="gest ${gestAnim?'g-anim':''}">${gesture(s.t,30)}</div>`;
+    div.querySelector('.gest').style.animationDelay=(idx*60)+'ms';
+    div.querySelector('.gest').onclick=()=>Audio.jingtao(s.c);
+    if(s.sandhi){ const st=div.querySelector('.star'); if(st) st.onclick=e=>{e.stopPropagation();alert('Tone change: '+s.sandhi.from+' → '+s.sandhi.to+'\\n'+s.sandhi.why);}; }
+    wrap.appendChild(div);
+  });
+  return wrap;
+}
+
+/* ============================================================ WORD LOG / SR */
+function logWords(step){
+  if(step.type!=='drill'&&step.type!=='intro'&&!(step.type==='exchange'))return;
+  promptCounter++;
+  const syls=step.syl||[]; const ids=new Set();
+  // map syllables back to vocab words is approximate; log by lesson intro + used chars
+  (LESSONS[state.li].intro||[]).forEach(id=>{ if(step.type==='intro'&&VMAP[id]){} });
+  // log intro word
+  if(step.type==='intro'&&step.word){ /* handled by lesson intro unlock */ }
+  // generic: log every vocab id whose characters appear
+  const chars=(syls.map(s=>s.c).join(''));
+  VOCAB.forEach(v=>{ const w=build(v[2]); const wc=w.map(s=>s.c).join(''); if(wc&&chars.includes(wc)){ mark(v[0]); } });
+}
+function mark(id){
+  if(!wordlog[id]) wordlog[id]={introduced:promptCounter,lastSeen:promptCounter,seenCount:0};
+  wordlog[id].lastSeen=promptCounter; wordlog[id].seenCount++;
+  if(booklet.indexOf(id)<0) booklet.push(id);
+  save(LS.wordlog,wordlog); save(LS.booklet,booklet);
+}
+function unlockLessonWords(li){ (LESSONS[li].intro||[]).forEach(id=>{ if(booklet.indexOf(id)<0){booklet.push(id);} if(!wordlog[id])wordlog[id]={introduced:promptCounter,lastSeen:promptCounter,seenCount:0}; }); save(LS.booklet,booklet); save(LS.wordlog,wordlog); }
+function staleWords(){ return Object.keys(wordlog).filter(id=>promptCounter-wordlog[id].lastSeen>=20); }
+
+/* ============================================================ FLOW ENGINE */
+const stage=document.getElementById('stage');
+let currentControls=null;
+
+function setProg(){
+  const L=LESSONS[state.li];
+  document.getElementById('prog').textContent=`Lesson ${L.id} of 9 · step ${state.si+1} of ${L.steps.length} — ${L.title}`;
+}
+
+function pauseBar(skippable){
+  return new Promise(res=>{
+    const w=document.createElement('div'); w.className='pausewrap';
+    w.innerHTML=`<div class="pauselabel">thinking time…</div><div class="pausebar"><div class="pausefill"></div></div>`;
+    stage.appendChild(w);
+    const fill=w.querySelector('.pausefill'), lab=w.querySelector('.pauselabel'), bar=w.querySelector('.pausebar');
+    const dur=4000; const t0=performance.now(); let done=false;
+    function step(t){ const p=Math.min(1,(t-t0)/dur); fill.style.width=(p*100)+'%'; if(p>=0.875)lab.style.opacity=0;
+      if(p<1&&!done)requestAnimationFrame(step); else if(!done){done=true;res();} }
+    requestAnimationFrame(step);
+    if(skippable){ bar.onclick=()=>{ if(!done){done=true;fill.style.width='100%';res();} }; }
+  });
+}
+
+async function runStep(){
+  stage.innerHTML=''; setProg(); if(DEBUG)renderDebug();
+  const L=LESSONS[state.li]; const step=L.steps[state.si];
+  const firstView=!viewed.has(state.li+'.'+state.si);
+  // lesson-boundary recycle note (first step of a lesson beyond 1)
+  if(step.type==='tones'){ await renderTones(); return; }
+  if(step.type==='wordorder'){ renderWordOrderStep(); return; }
+  if(step.type==='intro'){ await renderIntro(step); }
+  else if(step.type==='teach'){ await renderTeach(step); }
+  else if(step.type==='exchange'){ await renderExchange(step,firstView); }
+  else if(step.type==='drill'){ await renderDrill(step,firstView); }
+  viewed.add(state.li+'.'+state.si);
+  save(LS.lesson,state.li); save(LS.step,state.si);
+}
+
+function card(){ const c=document.createElement('div'); c.className='card'; stage.appendChild(c); return c; }
+function controlsBar(items){
+  const c=document.createElement('div'); c.className='controls';
+  items.forEach(it=>{ const b=document.createElement('button'); b.className='ctl'+(it.cls?' '+it.cls:''); b.innerHTML=it.label; b.onclick=it.fn; c.appendChild(b); });
+  return c;
+}
+const PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+
+async function renderIntro(step){
+  const c=card();
+  const who=document.createElement('div'); who.className='who'; who.textContent='Harold'; c.appendChild(who);
+  const t=document.createElement('div'); t.className='teacher'; t.textContent=step.text; c.appendChild(t);
+  await Audio.speak('harold',step.text);
+  if(step.word){
+    const r=document.createElement('div'); r.className='reveal'; c.appendChild(r);
+    await Audio.jingtao(zhText(step.word));
+    r.appendChild(renderSent(step.word,true)); requestAnimationFrame(()=>r.classList.add('show'));
+    logWords(step);
+  }
+  c.appendChild(controlsBar([
+    {label:'▶ Harold',fn:()=>Audio.speak('harold',step.text)},
+    step.word?{label:'▶ Jingtao',cls:'primary',fn:()=>Audio.jingtao(zhText(step.word))}:null,
+    step.word?{label:'▶ slow',cls:'slow',fn:()=>Audio.jingtao(zhText(step.word),{slow:true})}:null,
+    {label:'next →',cls:'primary',fn:advance}
+  ].filter(Boolean)));
+}
+async function renderTeach(step){
+  const c=card();
+  c.innerHTML=`<div class="who">Harold</div><div class="teacher">${step.text}</div>`;
+  await Audio.speak('harold',step.text);
+  c.appendChild(controlsBar([{label:'▶ Harold',fn:()=>Audio.speak('harold',step.text)},{label:'▶ slow',cls:'slow',fn:()=>Audio.speak('harold',step.text,{slow:true})},{label:'next →',cls:'primary',fn:advance}]));
+}
+async function renderExchange(step,firstView){
+  const c=card();
+  for(const line of step.lines){
+    if(line.who==='pause'){ await pauseBar(!firstView); continue; }
+    if(line.who==='jingtao'){
+      const r=document.createElement('div'); r.className='reveal'; c.appendChild(r);
+      await Audio.jingtao(zhText(line.syl));
+      r.appendChild(renderSent(line.syl,true)); requestAnimationFrame(()=>r.classList.add('show'));
+      continue;
+    }
+    const isT=line.who==='Harold';
+    const d=document.createElement('div'); d.className=isT?'':'student';
+    d.innerHTML=`<div class="who">${line.who}</div><div class="${isT?'teacher':''}">${isT?line.t:'<b>'+line.who+'</b>: '+line.t}</div>`;
+    c.appendChild(d);
+    const role=line.who==='Harold'?'harold':(line.who==='Sarah'?'sarah':'james');
+    await Audio.speak(role,line.t);
+  }
+  logWords(step);
+  c.appendChild(controlsBar([
+    {label:'▶ replay',fn:async()=>{ for(const l of step.lines){ if(l.who==='pause'){await new Promise(r=>setTimeout(r,700));continue;} if(l.who==='jingtao'){await Audio.jingtao(zhText(l.syl));continue;} await Audio.speak(l.who==='Harold'?'harold':l.who==='Sarah'?'sarah':'james',l.t);} }},
+    {label:'next →',cls:'primary',fn:advance}
+  ]));
+}
+async function renderDrill(step,firstView){
+  const c=card();
+  const e=document.createElement('div'); e.className='eng'; e.textContent='“'+step.en+'”'; c.appendChild(e);
+  const th=document.createElement('div'); th.className='teacher'; th.textContent='Build it. Then Jingtao will confirm.'; c.appendChild(th);
+  await Audio.speak('harold',step.en);
+  await pauseBar(!firstView);
+  const zh=zhText(step.syl,step.end);
+  await Audio.jingtao(zh);
+  await new Promise(r=>setTimeout(r,500));
+  const r=document.createElement('div'); r.className='reveal'; c.appendChild(r);
+  r.appendChild(renderSent(step.syl,true)); requestAnimationFrame(()=>r.classList.add('show'));
+  logWords(step);
+  if(step.note){ const n=document.createElement('div'); n.className='teacher'; n.style.marginTop='10px'; n.textContent=step.note; r.appendChild(n); await Audio.speak('harold',step.note); }
+  c.appendChild(controlsBar([
+    {label:'▶ Harold',fn:()=>Audio.speak('harold',step.en)},
+    {label:'▶ slow',cls:'slow',fn:()=>Audio.speak('harold',step.en,{slow:true})},
+    {label:'▶ Jingtao',cls:'primary',fn:()=>Audio.jingtao(zh)},
+    {label:'▶ slow',cls:'slow',fn:()=>Audio.jingtao(zh,{slow:true})},
+    {label:'next →',cls:'primary',fn:advance}
+  ]));
+}
+
+async function renderTones(){
+  const c=card();
+  c.innerHTML=`<div class="who">Harold</div><div class="teacher">Same mouth position. Four completely different words. Colour and gesture — your body will remember, not just your brain.</div>`;
+  const demo=document.createElement('div'); demo.className='tone-demo'; c.appendChild(demo);
+  const rows=[[1,'mā','妈','mother'],[2,'má','麻','hemp'],[3,'mǎ','马','horse'],[4,'mà','骂','scold']];
+  rows.forEach(([t,py,ch,en])=>{
+    const row=document.createElement('div'); row.className='tone-row';
+    row.innerHTML=`<div>${gesture(t,54)}</div>`+
+      `<div class="lab"><div class="py zh" style="color:${TC[t]}">${py} <span class="ch">${ch}</span></div><small>${TNAME[t]} · ${en}</small></div>`+
+      `<div>${pitchCurve(t)}</div>`+
+      `<button class="ctl primary">${PLAY}</button>`;
+    row.querySelector('button').onclick=()=>Audio.jingtao(ch);
+    row.querySelector('.gest,div').onclick;
+    demo.appendChild(row);
+  });
+  await Audio.speak('harold','Same mouth position. Four completely different words.');
+  for(const [,,ch] of rows){ await Audio.jingtao(ch); await new Promise(r=>setTimeout(r,250)); }
+  c.appendChild(controlsBar([{label:'play all four',fn:async()=>{for(const [,,ch] of rows){await Audio.jingtao(ch);await new Promise(r=>setTimeout(r,250));}}},{label:'next →',cls:'primary',fn:advance}]));
+}
+function renderWordOrderStep(){
+  buildWODiagram();
+  const c=card();
+  c.innerHTML=`<div class="who">Harold</div><div class="teacher">Here is the architecture of a Mandarin sentence. Subject — then Time — then Place — then Verb — then Object. Wǒ míngtiān zài jiā chī fàn. I, tomorrow, at home, eat, food. Once you have this pattern, you can build anything.</div>`;
+  const wd=document.getElementById('woDiagram').cloneNode(true); c.appendChild(wd);
+  Audio.speak('harold','Here is the architecture of a Mandarin sentence. Subject, then time, then place, then verb, then object.');
+  c.appendChild(controlsBar([{label:'▶ Harold',fn:()=>Audio.speak('harold','Subject, time, place, verb, object.')},{label:'open full diagram',fn:()=>openOverlay('woOverlay')},{label:'next →',cls:'primary',fn:advance}]));
+}
+
+function advance(){
+  const L=LESSONS[state.li];
+  if(state.si< L.steps.length-1){ state.si++; runStep(); }
+  else{ lessonComplete(); }
+}
+
+/* ============================================================ LESSON COMPLETE */
+function lessonComplete(){
+  const L=LESSONS[state.li];
+  stage.innerHTML='';
+  const c=card();
+  c.innerHTML=`<h2>Lesson ${L.id} complete</h2><div class="sub">You did not memorise a single thing. You built it. Here is everything from this lesson — tap to hear Jingtao.</div>`;
+  const words=(L.intro&&L.intro.length?L.intro:collectLessonWords(L)).filter((v,i,a)=>a.indexOf(v)===i);
+  words.forEach(id=>{ const v=VMAP[id]; if(!v)return; const arr=build(v.parts);
+    const row=document.createElement('div'); row.className='done-word';
+    const s=renderSent(arr,false); s.style.flex='1'; row.appendChild(s);
+    const en=document.createElement('div'); en.className='en'; en.style.color='var(--muted)'; en.style.fontSize='13px'; en.textContent=v.en; row.appendChild(en);
+    const b=document.createElement('button'); b.className='ctl primary'; b.innerHTML=PLAY; b.onclick=()=>Audio.jingtao(zhText(arr)); row.appendChild(b);
+    c.appendChild(row);
+  });
+  if(state.li<LESSONS.length-1){
+    const b=document.createElement('button'); b.className='bigbtn'; b.style.width='100%'; b.style.marginTop='16px';
+    b.textContent=`Start Lesson ${L.id+1} — ${LESSONS[state.li+1].title}`;
+    b.onclick=()=>{ state.li++; state.si=0; unlockLessonWords(state.li); shownStars={bu:false,t3:false}; window._uShown=false; save(LS.lesson,state.li); save(LS.step,0); runStep(); };
+    c.appendChild(b);
+  } else {
+    const d=document.createElement('div'); d.className='teacher'; d.style.marginTop='16px';
+    d.textContent='That is the whole foundation. Nine lessons, and every sentence built from what came before. Go back through the booklet any time.'; c.appendChild(d);
+  }
+}
+function collectLessonWords(L){ const out=[]; L.steps.forEach(s=>{ if(s.syl){ VOCAB.forEach(v=>{ const wc=build(v[2]).map(x=>x.c).join(''); if(wc&&s.syl.map(x=>x.c).join('').includes(wc))out.push(v[0]); }); } }); return out; }
+
+/* ============================================================ WORD ORDER DIAGRAM */
+const WO_SLOTS=[['Subject','wo'],['Time','mingtian'],['Place','zai jia'],['Verb','chi'],['Object','fan']];
+function slotWords(name){
+  const m={ Subject:['wo','ni','ta','women','tamen'], Time:['xianzai','jintian','mingtian','zuotian'],
+    Place:['jia'], Verb:['shi','qu','lai','hui','chi','he','shuo','xiang','yao','you','neng','hui2'], Object:['fan','zhongwen','gongzuo','shijian'] };
+  return (m[name]||[]).filter(id=>booklet.indexOf(id)>=0);
+}
+function buildWODiagram(){
+  const d=document.getElementById('woDiagram'); d.innerHTML='';
+  WO_SLOTS.forEach((sl,i)=>{
+    const words=slotWords(sl[0]); const recent=words.slice(-3);
+    const el=document.createElement('div'); el.className='wo-slot';
+    const sample= recent.length? build(VMAP[recent[recent.length-1]].parts).map(s=>s.p).join('') : sl[1];
+    el.innerHTML=`<div class="t">${sl[0]}</div><div class="w zh">${sample}</div>`;
+    el.onclick=()=>{ let cyc=el._cyc||0; const list=words.length?words:[]; if(list.length){ cyc=(cyc+1)%list.length; el._cyc=cyc; el.querySelector('.w').textContent=build(VMAP[list[cyc]].parts).map(s=>s.p).join(''); }
+      const ex=document.getElementById('woExamples'); if(ex) ex.textContent=`${sl[0]}: `+(words.length?words.map(id=>build(VMAP[id].parts).map(s=>s.p).join('')).join(' · '):'more as you learn'); };
+    d.appendChild(el);
+    if(i<WO_SLOTS.length-1){ const a=document.createElement('div'); a.className='wo-arrow'; a.textContent='→'; d.appendChild(a); }
+  });
+}
+
+/* ============================================================ PANELS */
+function openOverlay(id){ document.getElementById(id).classList.add('open'); if(id==='woOverlay')buildWODiagram(); if(id==='bookPanel')renderBook(); }
+function closeOverlay(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeOverlay(b.dataset.close));
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o)o.classList.remove('open'); }));
+document.getElementById('btnBook').onclick=()=>{ const p=document.getElementById('bookPanel'); p.classList.toggle('open'); renderBook(); };
+document.getElementById('btnGuide').onclick=()=>openOverlay('guideOverlay');
+document.getElementById('btnWO').onclick=()=>openOverlay('woOverlay');
+document.getElementById('btnSet').onclick=()=>{ document.getElementById('ttsSource').value=settings.src; document.getElementById('azRegion').value=settings.region; document.getElementById('azKey').value=settings.key; document.getElementById('azVoice').value=settings.voice; openOverlay('setOverlay'); };
+
+function renderBook(){
+  const list=document.getElementById('bookList'); const q=(document.getElementById('bookSearch').value||'').toLowerCase();
+  list.innerHTML='';
+  const ids=booklet.slice();
+  VOCAB.forEach(v=>{ if(ids.indexOf(v[0])<0)return; const arr=build(v[2]); const py=pyJoin(arr).toLowerCase();
+    if(q && py.indexOf(q)<0 && v[1].toLowerCase().indexOf(q)<0) return;
+    const it=document.createElement('div'); it.className='book-item';
+    const s=renderSent(arr,false); s.style.flex='0 0 auto';
+    it.appendChild(s);
+    const en=document.createElement('div'); en.className='en'; en.textContent=v[1]; it.appendChild(en);
+    const b=document.createElement('button'); b.className='iconbtn'; b.innerHTML=PLAY; b.onclick=()=>Audio.jingtao(zhText(arr)); it.appendChild(b);
+    list.appendChild(it);
+  });
+  if(!list.children.length) list.innerHTML='<div class="sub">Nothing here yet — words appear as you meet them.</div>';
+}
+document.getElementById('bookSearch').oninput=renderBook;
+
+function renderGuide(){
+  const g=document.getElementById('guideGrid'); g.innerHTML=''; const grid=document.createElement('div'); grid.className='grid'; g.appendChild(grid);
+  GUIDE.forEach((row,i)=>{
+    const [sp,ap,ex,ch]=row; const card=document.createElement('div'); card.className='gcard';
+    card.innerHTML=`<div class="py">${sp}</div><small>${ap}</small><div class="row"><button class="ctl">${PLAY} <span class="zh">${ex}</span></button><div class="tick" data-k="g${i}">✓</div></div>`;
+    card.querySelector('.ctl').onclick=()=>Audio.jingtao(ch);
+    const tk=card.querySelector('.tick'); if(ticks['g'+i])tk.classList.add('on');
+    tk.onclick=()=>{ ticks['g'+i]=!ticks['g'+i]; tk.classList.toggle('on'); save(LS.ticks,ticks); };
+    grid.appendChild(card);
+  });
+}
+document.querySelectorAll('#guideOverlay [data-zh]').forEach(b=>b.onclick=()=>Audio.jingtao(b.dataset.zh));
+document.getElementById('guideDone').onclick=()=>{ save(LS.pinyin,true); closeOverlay('guideOverlay'); };
+
+/* settings */
+document.getElementById('saveSet').onclick=()=>{ settings={src:document.getElementById('ttsSource').value,region:document.getElementById('azRegion').value.trim(),key:document.getElementById('azKey').value.trim(),voice:document.getElementById('azVoice').value.trim()||'zh-CN-XiaoxiaoNeural'}; save(LS.settings,settings); Audio.azureToken=null; closeOverlay('setOverlay'); };
+document.getElementById('testSet').onclick=()=>{ const s={src:document.getElementById('ttsSource').value,region:document.getElementById('azRegion').value.trim(),key:document.getElementById('azKey').value.trim(),voice:document.getElementById('azVoice').value.trim()}; Object.assign(settings,s); Audio.azureToken=null; Audio.jingtao('你好'); };
+document.getElementById('resetAll').onclick=()=>{ if(confirm('Clear all saved progress?')){ Object.values(LS).forEach(k=>localStorage.removeItem(k)); location.reload(); } };
+
+/* ============================================================ DEBUG */
+function renderDebug(){
+  const d=document.getElementById('debugPanel'); d.classList.add('open');
+  const L=LESSONS[state.li];
+  let seq=L.steps.map((s,i)=>`${i===state.si?'▶':' '} ${i} ${s.type}${s.en?': '+s.en:''}`).join('\n');
+  let wl=Object.keys(wordlog).sort((a,b)=>wordlog[b].lastSeen-wordlog[a].lastSeen).slice(0,20).map(id=>`${id} seen×${wordlog[id].seenCount} last@${wordlog[id].lastSeen}`).join('\n');
+  d.innerHTML=`<b>DEBUG</b>  promptCounter=${promptCounter}\n<b>lesson ${L.id}</b> step ${state.si}\n\n<b>SEQUENCE</b>\n${seq}\n\n<b>STALE (20+):</b> ${staleWords().join(', ')||'none'}\n\n<b>WORDLOG</b>\n${wl}\n\n<b>booklet</b> ${booklet.length} words\n<b>tts</b> ${settings.src}`;
+}
+
+/* ============================================================ WELCOME BACK */
+function welcomeBack(){
+  const L=LESSONS[state.li];
+  const lastId=(L.intro&&L.intro.length)?L.intro[Math.max(0,Math.min(L.intro.length-1, state.si))]:null;
+  const v=lastId&&VMAP[lastId]?build(VMAP[lastId].parts):build(['nihao'].map ? ['ni'] : ['ni']);
+  stage.innerHTML='';
+  const c=card();
+  c.innerHTML=`<h2>Welcome back</h2><div class="sub">Lesson ${L.id} of 9 · step ${state.si+1}</div>`;
+  const lw=document.createElement('div'); lw.innerHTML='<div class="teacher">Last word you met:</div>'; c.appendChild(lw);
+  const arr=lastId&&VMAP[lastId]?build(VMAP[lastId].parts):build(['ni']);
+  const s=renderSent(arr,false); c.appendChild(s);
+  const en=document.createElement('div'); en.className='teacher'; en.textContent=(lastId&&VMAP[lastId])?VMAP[lastId].en:''; c.appendChild(en);
+  c.appendChild(controlsBar([
+    {label:'▶ Jingtao',fn:()=>Audio.jingtao(zhText(arr))},
+    {label:'continue →',cls:'primary',fn:()=>runStep()}
+  ]));
+}
+
+/* ============================================================ INIT */
+function start(){
+  document.getElementById('beginGate').style.display='none';
+  Audio.unlock();
+  if(typeof speechSynthesis!=='undefined') speechSynthesis.onvoiceschanged=()=>Audio.pickVoices();
+  renderGuide();
+  unlockLessonWords(state.li);
+  const resuming = (state.li>0 || state.si>0);
+  const seenGuide = load(LS.pinyin,false);
+  if(!seenGuide && !resuming){ openOverlay('guideOverlay'); document.getElementById('guideDone').onclick=()=>{ save(LS.pinyin,true); closeOverlay('guideOverlay'); runStep(); }; }
+  else if(resuming){ welcomeBack(); }
+  else { runStep(); }
+  if(DEBUG) renderDebug();
+}
+document.getElementById('beginBtn').onclick=start;
+// preload voices list
+if(typeof speechSynthesis!=='undefined'){ speechSynthesis.getVoices(); }
+</script>
+</body>
+</html>

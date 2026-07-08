@@ -1,2 +1,81 @@
 Reading the full HTML file to audit the specific areas you flagged.
 Checking the workspace file and tracing critical code paths for runtime verification.
+## Audit: concrete bugs
+
+### Verified claims (your six checks)
+
+**(1) `runStep` / `pauseBar` / `reveal` audio sequencing**
+
+Within a **single** `runStep()` call, the auto-play path does await in order (`speak` → `pauseBar` → `jingtao` → reveal) in `renderDrill` (lines 798–804) and `renderExchange` (lines 774–778).
+
+However, steps **can overlap** in practice:
+
+- **`advance()`** (line 844–847) calls `runStep()` with no `await` and no re-entry guard; rapid double-clicks on `next →` / `continue →` can run multiple `runStep()` instances in parallel, each clearing `#stage` and driving audio.
+- **`Audio.jingtao`** (line 641) always schedules `setTimeout(()=>res(true), 8000)`, so the promise can resolve **before** playback ends; `renderDrill` then continues to reveal / Harold note while Mandarin audio may still be playing.
+- **`Audio.speak`** (line 614) has the same early-resolve timeout pattern.
+
+**(2) “First view cannot skip pause”**
+
+Works **only in-memory, same session, first render of that step**:
+
+- `firstView = !viewed.has(...)` (line 727) is evaluated **before** `viewed.add` (line 735), so the first in-session render correctly passes `pauseBar(false)` via `pauseBar(!firstView)` (lines 774, 799).
+- `viewed` is **not persisted** (line 581); after reload/resume, every step is treated as first view → pause is **never skippable** on return visits.
+- `tones` / `wordorder` early-return (lines 729–730) skips `viewed.add`, so those steps are always “first view” if ever re-entered.
+
+**(3) `welcomeBack` / `build(['ni'])` crash**
+
+**No crash.** `build(['ni'])` is valid (`ni` exists in `SYL`).
+
+Problems are logic, not runtime:
+
+- `['nihao'].map ? ['ni'] : ['ni']` (line 959): `Array.prototype.map` is always truthy → always `['ni']`; dead/confusing code. Assigned to unused `v`.
+- `lastId = L.intro[state.si]` (line 958) indexes the lesson **vocab intro list** by **step index** — wrong mapping once `state.si` exceeds `intro.length` or passes intro-only steps. Shows misleading “last word” (e.g. mid–Lesson 3 shows an early intro word, not the last drill vocabulary).
+
+**(4) `logWords` double-count / mis-attribution**
+
+**Yes, multiple concrete issues** in `logWords` (lines 680–690):
+
+- **Re-count on resume:** `welcomeBack` → `continue →` `runStep()` re-renders the saved step and calls `logWords` again → `seenCount++` and `promptCounter++` for the same step.
+- **Exchange steps never log words:** `logWords(step)` uses `step.syl||[]`; `EX(...)` steps have no top-level `syl` (only `lines[].syl`) → `chars` is `''` → no `mark()`, but `promptCounter` still increments.
+- **Substring false positives:** `chars.includes(wc)` marks shorter vocab inside longer strings (e.g. drill `nihao` (你好) also marks `hao` (好); any compound containing 人 marks `ren`).
+
+**(5) Azure fetch error handling**
+
+No throw/crash — `azure()` catches and returns `null` (lines 620–628). Failures are **silent**; `jingtao` falls back to Google/Youdao with no indication Azure failed. `testSet` (line 943) does not surface success/failure. **Degraded behaviour, not a runtime error.**
+
+**(6) `LESSONS[7]` patch + “May I go?” ternary**
+
+**Not a functional bug.** Ternary `[keSandhi(),'yi3','wo'].length ? …` is always truthy (length 3), so `D()` already gets `['wo', keSandhi(), 'yi3', 'qu']`. Post-init patch (line 555) is **redundant** but harmless. Result is correct 我可以去.
+
+---
+
+### Additional concrete bugs
+
+| Severity | Symptom | Location |
+|----------|---------|----------|
+| **BLOCKER** | Lesson 8 uses vocab key `'hui2'` in `build(['hui2', …])` but `SYL` has only `hui4`. Produces syllables with only `{_k:'hui2'}` — blank pinyin/character, empty TTS, broken gestures/colours. Affects INTRO (line 518), exchange jingtao (526), and drills (528–529). | `build()` (269–270), Lesson 8 |
+| **MAJOR** | Double-click `next →` / `continue →` can overlap `runStep()` executions (parallel audio, race on `state.si` / `save`). | `advance()` (844–847), `welcomeBack` continue (969) |
+| **MAJOR** | `jingtao` 8s safety timer resolves `true` while audio may still be playing → reveal/note audio can overlap Mandarin playback. | `Audio.jingtao` (641) |
+| **MAJOR** | Resume flow re-logs the current step, inflating SRS `seenCount` / `promptCounter`. | `welcomeBack` + `logWords` |
+| **MAJOR** | Exchange steps contribute to `promptCounter` but never `mark()` any vocabulary. | `logWords` (680–690), all `EX(...)` steps |
+| **MAJOR** | Substring matching marks component words (e.g. `hao` inside `nihao`, `ren` inside nationality compounds). | `logWords` (690) |
+| **MAJOR** | Welcome-back “last word” uses `L.intro[state.si]` instead of actual last-met vocabulary. | `welcomeBack` (958) |
+| **MINOR** | `viewed` not in `localStorage` → pause always unskippable after reload. | `viewed` (581), `runStep` (727) |
+| **MINOR** | `tones` / `wordorder` early-return never runs `viewed.add`. | `runStep` (729–730 vs 735) |
+| **MINOR** | Azure misconfiguration/test failure invisible to user when `settings.src === 'azure'`. | `azure()` (628), `testSet` (943) |
+| **MINOR** | `renderWordOrderStep` fires `Audio.speak` without `await` — user can advance before Harold finishes. | `renderWordOrderStep` (840) |
+| **MINOR** | `promptCounter` init picks `lastSeen` from last matching `wordlog` entry, not `Math.max(lastSeen)` — weak baseline after reload. | line 579 |
+| **MINOR** | Corrupt `localStorage` (`state.si` ≥ `steps.length`) → `step` is `undefined` → `step.type` throws. | `runStep` (726–729) |
+
+### Not bugs (for these items)
+
+- `build(['ni'])` fallback — safe, no throw.
+- “May I go?” drill — correct after `D()` + patch; ternary is dead code only.
+- Azure network/auth errors — handled via fallback, not unhandled rejections.
+- In-session first-view pause lock — correct given `viewed` timing.
+
+---
+
+**FINDINGS: 13**
+
+**Verdict:** Core lesson flow is structured with proper `await`s, but Lesson 8 `hui2` lookup is broken, `advance`/`jingtao` allow real audio/state races, and `logWords`/`welcomeBack` mishandle resume tracking and vocabulary attribution.

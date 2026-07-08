@@ -515,7 +515,7 @@ const LESSONS=[
   intro:['neng','hui2','keyi','zhege','danshi'],
   steps:[
    TEACH("Three different cans. Néng — are you physically able, do circumstances allow? Huì — have you learned the skill? Kěyǐ — is it permitted, may you?"),
-   INTRO("Huì — can, in the sense of a learned skill. Also 'will'.",['hui2']),
+   INTRO("Huì — can, in the sense of a learned skill. Also 'will'.",['hui4']),
    INTRO("Kěyǐ — may, allowed to. Two tone threes, so kě becomes tone two: kéyǐ.",[keSandhi(),'yi3']),
    INTRO("Zhège — this one. Dànshì — but, however.",['zhe','ge']),
    EX([
@@ -523,10 +523,10 @@ const LESSONS=[
      {who:'pause'},
      {who:'Sarah',t:"Tā... huì shuō zhōngwén ma?"},
      {who:'Harold',t:"Exactly right — huì, the skill. If you meant physically able, maybe a sore throat, you would use néng instead."},
-     {who:'jingtao',syl:build(['ta','hui2','shuo','zhong','wen','ma'])}
+     {who:'jingtao',syl:build(['ta','hui4','shuo','zhong','wen','ma'])}
    ]),
-   D("Can you speak Chinese?",['ni','hui2','shuo','zhong','wen','ma'],"Huì — the learned skill.","？"),
-   D("I can't speak Chinese yet",['wo','hai','bu','hui2','shuo','zhong','wen'],"Bù before huì (tone four) becomes bú."),
+   D("Can you speak Chinese?",['ni','hui4','shuo','zhong','wen','ma'],"Huì — the learned skill.","？"),
+   D("I can't speak Chinese yet",['wo','hai','bu','hui4','shuo','zhong','wen'],"Bù before huì (tone four) becomes bú."),
    D("May I go?",[keSandhi(),'yi3','wo'].length?['wo',keSandhi(),'yi3','qu']:[],"Kěyǐ — permission.","？"),
    D("She can't come today",['ta','jin','tian','bu','neng','lai'],"Néng — circumstances. Bù néng — néng is tone two, bù stays."),
    D("Can you eat this?",['ni',keSandhi(),'yi3','chi','zhe','ge','ma'],"Kěyǐ — is it okay to.","？"),
@@ -564,7 +564,7 @@ const GUIDE=[
 
 /* ============================================================ STATE */
 const LS={ lesson:'mt_lesson', step:'mt_prompt', wordlog:'mt_wordlog', booklet:'mt_booklet',
-  pinyin:'mt_pinyin_dismissed', settings:'mt_settings', ticks:'mt_ticks' };
+  pinyin:'mt_pinyin_dismissed', settings:'mt_settings', ticks:'mt_ticks', lastword:'mt_lastword' };
 function load(k,d){ try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;} }
 function save(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
 
@@ -573,7 +573,9 @@ let wordlog=load(LS.wordlog,{});
 let booklet=load(LS.booklet,[]);
 let settings=load(LS.settings,{src:'google',region:'',key:'',voice:'zh-CN-XiaoxiaoNeural'});
 let ticks=load(LS.ticks,{});
-let promptCounter=0; Object.values(wordlog).forEach(w=>{if(w.seenCount>promptCounter)promptCounter=w.lastSeen||0;});
+let lastWordId=load(LS.lastword,null);
+let loggedSteps=new Set();
+let promptCounter=0; Object.values(wordlog).forEach(w=>{ if((w.lastSeen||0)>promptCounter)promptCounter=w.lastSeen; });
 let shownStars={bu:false,t3:false};
 let viewed=new Set();
 const DEBUG=/[?&]debug=1/.test(location.search);
@@ -608,7 +610,7 @@ const Audio={
         u.rate=opt.slow?0.6:m[1]; u.pitch=m[2];
         u.onend=res; u.onerror=res;
         speechSynthesis.cancel(); speechSynthesis.speak(u);
-        setTimeout(res, Math.min(9000, 900+text.length*90)); // safety
+        setTimeout(res, Math.min(16000, 1600+text.length*110)); // safety, generous so long lines are never truncated
       }catch(e){res();}
     });
   },
@@ -638,7 +640,7 @@ const Audio={
       a.onerror=tryNext;
       a.onplaying=()=>hideBanner();
       tryNext();
-      setTimeout(()=>res(true), 8000);
+      setTimeout(()=>res(true), 16000); // safety only; onended is the real resolver
     });
   }
 };
@@ -660,12 +662,12 @@ function renderSent(arr,gestAnim){
     const col=TC[s.t];
     const div=document.createElement('div'); div.className='syl';
     let star='';
-    if(s.sandhi && !shownStars[s.sandhi.type]){ shownStars[s.sandhi.type]=true; s._star=true; }
-    if(s.sandhi){ star=`<span class="star" style="color:${col}" title="Tone change: ${s.sandhi.from} → ${s.sandhi.to} — ${s.sandhi.why}">★</span>`; }
+    if(s.sandhi && !shownStars[s.sandhi.type]){ shownStars[s.sandhi.type]=true;
+      star=`<span class="star" style="color:${col}" title="Tone change: ${s.sandhi.from} → ${s.sandhi.to} — ${s.sandhi.why}">★</span>`; }
     // ü hint
     let hint='';
     if(s.u2y && !window._uShown){ window._uShown=true; hint=`<span class="hint" title="This u is actually ü — see the ? guide" style="font-size:10px">ü</span>`; }
-    div.innerHTML=`<div class="py" style="color:${col}">${s.p}${s.sandhi?star:''} ${hint}</div>`+
+    div.innerHTML=`<div class="py" style="color:${col}">${s.p}${star} ${hint}</div>`+
       `<div class="ch">${s.c}</div>`+
       `<div class="gest ${gestAnim?'g-anim':''}">${gesture(s.t,30)}</div>`;
     div.querySelector('.gest').style.animationDelay=(idx*60)+'ms';
@@ -678,21 +680,26 @@ function renderSent(arr,gestAnim){
 
 /* ============================================================ WORD LOG / SR */
 function logWords(step){
-  if(step.type!=='drill'&&step.type!=='intro'&&!(step.type==='exchange'))return;
+  if(step.type!=='drill'&&step.type!=='intro'&&step.type!=='exchange')return;
+  const skey=state.li+'.'+state.si;
+  if(loggedSteps.has(skey))return;   // do not re-count on resume/replay
+  loggedSteps.add(skey);
   promptCounter++;
-  const syls=step.syl||[]; const ids=new Set();
-  // map syllables back to vocab words is approximate; log by lesson intro + used chars
-  (LESSONS[state.li].intro||[]).forEach(id=>{ if(step.type==='intro'&&VMAP[id]){} });
-  // log intro word
-  if(step.type==='intro'&&step.word){ /* handled by lesson intro unlock */ }
-  // generic: log every vocab id whose characters appear
-  const chars=(syls.map(s=>s.c).join(''));
-  VOCAB.forEach(v=>{ const w=build(v[2]); const wc=w.map(s=>s.c).join(''); if(wc&&chars.includes(wc)){ mark(v[0]); } });
+  // gather characters from drill/intro syllables OR exchange lines
+  let chars='';
+  if(step.syl) chars+=step.syl.map(s=>s.c).join('');
+  if(step.word) chars+=step.word.map(s=>s.c).join('');
+  if(step.lines) step.lines.forEach(l=>{ if(l.syl)chars+=l.syl.map(s=>s.c).join(''); });
+  // longest word first, consume matched spans so a component (好 in 你好) is not over-marked
+  let s=chars;
+  VOCAB.slice().sort((a,b)=>build(b[2]).map(x=>x.c).join('').length-build(a[2]).map(x=>x.c).join('').length)
+    .forEach(v=>{ const wc=build(v[2]).map(x=>x.c).join(''); if(wc&&s.includes(wc)){ mark(v[0]); s=s.split(wc).join(''); } });
 }
 function mark(id){
   if(!wordlog[id]) wordlog[id]={introduced:promptCounter,lastSeen:promptCounter,seenCount:0};
   wordlog[id].lastSeen=promptCounter; wordlog[id].seenCount++;
   if(booklet.indexOf(id)<0) booklet.push(id);
+  lastWordId=id; save(LS.lastword,lastWordId);
   save(LS.wordlog,wordlog); save(LS.booklet,booklet);
 }
 function unlockLessonWords(li){ (LESSONS[li].intro||[]).forEach(id=>{ if(booklet.indexOf(id)<0){booklet.push(id);} if(!wordlog[id])wordlog[id]={introduced:promptCounter,lastSeen:promptCounter,seenCount:0}; }); save(LS.booklet,booklet); save(LS.wordlog,wordlog); }
@@ -722,8 +729,11 @@ function pauseBar(skippable){
 }
 
 async function runStep(){
+  if(state.li>=LESSONS.length)state.li=LESSONS.length-1; if(state.li<0)state.li=0;
+  const L=LESSONS[state.li];
+  if(state.si>=L.steps.length)state.si=L.steps.length-1; if(state.si<0)state.si=0;
   stage.innerHTML=''; setProg(); if(DEBUG)renderDebug();
-  const L=LESSONS[state.li]; const step=L.steps[state.si];
+  const step=L.steps[state.si];
   const firstView=!viewed.has(state.li+'.'+state.si);
   // lesson-boundary recycle note (first step of a lesson beyond 1)
   if(step.type==='tones'){ await renderTones(); return; }
@@ -836,12 +846,16 @@ function renderWordOrderStep(){
   buildWODiagram();
   const c=card();
   c.innerHTML=`<div class="who">Harold</div><div class="teacher">Here is the architecture of a Mandarin sentence. Subject — then Time — then Place — then Verb — then Object. Wǒ míngtiān zài jiā chī fàn. I, tomorrow, at home, eat, food. Once you have this pattern, you can build anything.</div>`;
-  const wd=document.getElementById('woDiagram').cloneNode(true); c.appendChild(wd);
+  const wd=document.createElement('div'); wd.className='wo-diagram'; buildWODiagram(wd); c.appendChild(wd);
   Audio.speak('harold','Here is the architecture of a Mandarin sentence. Subject, then time, then place, then verb, then object.');
   c.appendChild(controlsBar([{label:'▶ Harold',fn:()=>Audio.speak('harold','Subject, time, place, verb, object.')},{label:'open full diagram',fn:()=>openOverlay('woOverlay')},{label:'next →',cls:'primary',fn:advance}]));
 }
 
+let lastAdvance=0;
 function advance(){
+  const now=(window.performance?performance.now():0);
+  if(now-lastAdvance<600) return; // debounce double-taps -> no overlapping runStep/audio
+  lastAdvance=now;
   const L=LESSONS[state.li];
   if(state.si< L.steps.length-1){ state.si++; runStep(); }
   else{ lessonComplete(); }
@@ -880,8 +894,8 @@ function slotWords(name){
     Place:['jia'], Verb:['shi','qu','lai','hui','chi','he','shuo','xiang','yao','you','neng','hui2'], Object:['fan','zhongwen','gongzuo','shijian'] };
   return (m[name]||[]).filter(id=>booklet.indexOf(id)>=0);
 }
-function buildWODiagram(){
-  const d=document.getElementById('woDiagram'); d.innerHTML='';
+function buildWODiagram(d){
+  d=d||document.getElementById('woDiagram'); d.innerHTML='';
   WO_SLOTS.forEach((sl,i)=>{
     const words=slotWords(sl[0]); const recent=words.slice(-3);
     const el=document.createElement('div'); el.className='wo-slot';
@@ -952,15 +966,14 @@ function renderDebug(){
 /* ============================================================ WELCOME BACK */
 function welcomeBack(){
   const L=LESSONS[state.li];
-  const lastId=(L.intro&&L.intro.length)?L.intro[Math.max(0,Math.min(L.intro.length-1, state.si))]:null;
-  const v=lastId&&VMAP[lastId]?build(VMAP[lastId].parts):build(['nihao'].map ? ['ni'] : ['ni']);
+  const id=(lastWordId&&VMAP[lastWordId])?lastWordId:((L.intro&&L.intro.length)?L.intro[0]:'nihao');
+  const arr=VMAP[id]?build(VMAP[id].parts):build([niSandhi(),'hao']);
   stage.innerHTML='';
   const c=card();
   c.innerHTML=`<h2>Welcome back</h2><div class="sub">Lesson ${L.id} of 9 · step ${state.si+1}</div>`;
   const lw=document.createElement('div'); lw.innerHTML='<div class="teacher">Last word you met:</div>'; c.appendChild(lw);
-  const arr=lastId&&VMAP[lastId]?build(VMAP[lastId].parts):build(['ni']);
-  const s=renderSent(arr,false); c.appendChild(s);
-  const en=document.createElement('div'); en.className='teacher'; en.textContent=(lastId&&VMAP[lastId])?VMAP[lastId].en:''; c.appendChild(en);
+  c.appendChild(renderSent(arr,false));
+  const en=document.createElement('div'); en.className='teacher'; en.textContent=VMAP[id]?VMAP[id].en:''; c.appendChild(en);
   c.appendChild(controlsBar([
     {label:'▶ Jingtao',fn:()=>Audio.jingtao(zhText(arr))},
     {label:'continue →',cls:'primary',fn:()=>runStep()}

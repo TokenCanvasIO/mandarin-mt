@@ -1,0 +1,2 @@
+Reading the full HTML file to audit the specific areas you flagged.
+Checking the workspace file and tracing critical code paths for runtime verification.

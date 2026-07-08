@@ -1,3 +1,92 @@
 I'll audit the app against Michel Thomas principles and level coverage by exploring the codebase and any existing audit notes.
 I'll cross-check the app's lesson content against the authentic Harold Goodman Michel Thomas Mandarin curriculum for Foundation, Intermediate, and Advanced.
 [2m2026-07-08T11:53:23.706194Z[0m [31mERROR[0m tool_error: tool_output_error [3msession_id[0m[2m=[0m019f4191-6857-7b83-8b67-419db0976bcf [3mtool_name[0m[2m=[0m"WebFetch" [3meffective_tool_name[0m[2m=[0m"WebFetch" [3mmodel_id[0m[2m=[0m"grok-composer-2.5-fast" [3merror_kind[0m[2m=[0m"tool_output_error"
+# Michel Thomas Method Audit — Mandarin App
+
+Audit based on `index.html` lesson data, flow engine, and comparison to Harold Goodman’s official MT Mandarin line (Foundation → Intermediate → Vocabulary; legacy **Advanced** CD course exists but is no longer in the current digital bundle).
+
+---
+
+## QUESTION A — METHOD FIDELITY
+
+| Principle | Verdict | One-line assessment |
+|-----------|---------|---------------------|
+| No memorisation / no notes | **PARTIAL** | Copy says “never memorise — you construct,” but the booklet, pronunciation guide, tone ticks, and colour/gesture UI are standing reference aids (official MT ships a booklet too, but still not pure “no notes”). |
+| Student constructs from English cue | **PARTIAL** | Drills show English → thinking pause → reveal; the learner is never required to produce Mandarin aloud before the answer (passive watch-and-reveal, not active construction). |
+| Build new from known building blocks | **ALIGNED** | Core pedagogy throughout: `ni`+`hao`, `guo`+`ren`, `mei`+`you`, `ke`+`yi`, sandhi explained as composition rules. |
+| Two virtual students + user as third | **PARTIAL** | Harold + Sarah + James classroom exchanges exist; the user is not addressed as the third student and never answers on-mic—only “Build it” text, with Jingtao confirming. |
+| Thinking-time pauses | **ALIGNED** | 4s `pauseBar` on drills and exchange `{who:'pause'}` steps; replays can skip after first in-session view. |
+| No-stress redirects, not “wrong” | **ALIGNED** | Staged near-misses (“Almost”, “Close — but…”) with gentle correction; no punitive feedback anywhere. |
+| Constant recycling | **PARTIAL** | Strong within-lesson and Lesson 9 review; `staleWords()` exists in debug but is not wired into teaching—no cross-session spaced recycle. |
+| High-frequency first; delay colours/numbers | **ALIGNED** | Numbers/counters deferred to Lesson 7; no colour vocabulary; `shi`/`bu`/`ma`/`de`/movement verbs come first. |
+| Break words into known components | **ALIGNED** | Explicit decomposition in INTRO/TEACH/EX steps and sandhi as compositional rules (`bù`+`shì`→`bú shì`, `kě`+`yǐ`). |
+| “Unfolding” into long sentences | **PARTIAL** | Lesson 9 combines prior blocks into longer shapes, but complexity stops at Foundation ceiling—no multi-clause Intermediate/Advanced unfolding. |
+
+**Method summary:** The app captures Goodman’s *tone-colour classroom tone* and compositional grammar well, but it is a **spectator simulation** of MT, not a true third-student experience. You watch Sarah/James construct; you do not.
+
+---
+
+## QUESTION B — LEVEL COVERAGE
+
+### Verdict on the 9-lesson arc
+
+This is **Foundation-only** (compressed), not “beginner to advanced.”
+
+The app agrees: Lesson 9 ends with *“That is the whole foundation.”* Your lesson list maps closely to Goodman’s **Foundation** (~8 hours / 8 CDs): tones → `shì`/`bù` → pronouns → `ma` → `de` → desires/verbs → `qù`/`lái`/`huí`/`zài` + time-without-tense → `yǒu`/`méiyǒu` → numbers 1–12 + `gè`/`liǎng` + clock → `néng`/`huì`/`kěyǐ` → review.
+
+**Small Foundation gaps even vs. official Foundation:** no `tā` 她 as distinct from 他; thin nationality set; `gēn` only in the final drill; no `qǐng`; numbers stop at 12.
+
+**Everything below is absent** — this is Intermediate + Advanced territory in Goodman’s progression.
+
+---
+
+### Missing grammar: MT **INTERMEDIATE** (absent from app)
+
+Ranked by how essential each is to reach genuine MT “advanced” conversational ability:
+
+| Rank | Structure / topic | Why it matters |
+|------|-------------------|----------------|
+| **1** | **了 *le*** — completed action / change-of-state | Goodman’s Intermediate pivot; without it you cannot express “already done / now the case” beyond bare time words. |
+| **2** | **比 *bǐ*** (+ **更** *gèng*, **最** *zuì*) comparatives | “A is more X than B”; indispensable for real description and opinion. |
+| **3** | **Resultative complements** (*kànjiàn*, *tīngdǒng*, *zuòwán*, *dǎkāi*, *zhǎodào*…) | Core MT Intermediate verb-building; transforms simple verbs into precise outcomes. |
+| **4** | **Question words** — *shénme*, *nǎr/nǎlǐ*, *zěnme*, *wèishénme*, *duōshao* | Unlocks real information-seeking beyond `ma` yes/no. |
+| **5** | **到 *dào*** vs **在 *zài*** (arrival vs located-at) | Location/trip talk beyond “I am at home.” |
+| **6** | **给 *gěi*** (to / for / give) | Dative, benefactive, “do for someone”—high-frequency daily Mandarin. |
+| **7** | **Attributive 的** — Adj + **的** + N (*hǎo de fàn*) | Moves beyond possessive-only **的**; prerequisite for relative clauses. |
+| **8** | **过 *guo*** — experiential aspect (“have done before”) | Distinct from 了; Goodman teaches both in Intermediate. |
+| **9** | **着 *zhe*** — ongoing / retained state | “Door is open,” “wearing,” simultaneous state. |
+| **10** | **Directional complements** (*jìnlái*, *chūqù*, *huílái*, *shànglái*, *zǒu kāi*) | Movement + direction as single compositional blocks—hallmark MT chaining. |
+| **11** | **应该 *yīnggāi***, **可能 *kěnéng*** | Obligation and possibility beyond the three “cans.” |
+| **12** | **让 *ràng***, **请 *qǐng*** | Causative / permission requests. |
+| **13** | **从…到…**, **对 *duì*** (toward/regarding, not “correct”) | Spatial and interpersonal coverbs. |
+| **14** | **太…了**, **一点儿**, **已经**, **才**, **又** | Degree, moderation, temporal nuance. |
+| **15** | **Additional measure words** (*běn*, *zhāng*, *bēi*, *tiáo*…) | Beyond general *gè*. |
+| **16** | **Time-duration** (*liǎng gè xiǎoshí*), **要…了** “about to” | Duration and imminent change. |
+| **17** | **是不是** / **有没有** tag questions | Natural confirmation patterns. |
+
+---
+
+### Missing grammar: MT **ADVANCED** (legacy Advanced course; also absent)
+
+| Rank | Structure / topic | Why it matters |
+|------|-------------------|----------------|
+| **18** | **把 *bǎ*** disposal construction | Canonical “handle/dispose of object” pattern—Advanced centerpiece. |
+| **19** | **被 *bèi*** passive | Affected-party viewpoint (*bèi tā dǎle*). |
+| **20** | **是…的 *shì…de*** cleft / emphasis | When, where, how, with-whom something happened (*wǒ shì zuótiān lái de*). |
+| **21** | **Potential complements** (*kàn de dǒng*, *chī bu wán*) | Can/cannot manage to V—compositional “ability at point of action.” |
+| **22** | **Complex directional chains** (*zǒu shàng lóu qù*, *ná chūlái*) | Multi-segment complement stacking. |
+| **23** | **虽然…但是**, **如果…就** | Concession and condition—multi-clause discourse. |
+| **24** | **连…都/也** “even” | Emphasis and scope. |
+| **25** | **除了…以外** (…还/都/也) | Except / besides framing. |
+| **26** | **越…越** | Correlative comparison. |
+| **27** | **Relative clauses with 的** (*wǒ mǎi de shū*) | Full noun-modification beyond simple Adj+的. |
+| **28** | **不但…而且** | Formal paired conjunction. |
+| **29** | **Aspect stacking / nuanced 了–过–着 interplay** | Advanced fluency, not single-particle drills. |
+
+**Note:** Hachette’s current digital “third course” is **Vocabulary** (power-word expansion), not a separate grammar Advanced track. Your “advanced” target reasonably maps to **legacy Advanced + vocabulary depth**, which the app does not touch.
+
+---
+
+**LEVEL VERDICT:** **Foundation-complete (≈90–95% of Goodman Foundation), zero Intermediate grammar, zero Advanced grammar — roughly lower-intermediate descriptive ability at best, not MT Advanced.**
+
+**Additional lessons (rough):** At the app’s density (~10–12 steps/lesson, ~9 lessons ≈ one Foundation), you need about **6–8 lessons** for Intermediate, **4–6** for Advanced, plus **2–3** for vocabulary-style expansion → **~12–17 additional lessons** to genuinely reach MT Advanced-level grammar coverage in this format. A conservative single figure: **~14 more lessons**.

@@ -581,6 +581,9 @@ let viewed=new Set();
 const DEBUG=/[?&]debug=1/.test(location.search);
 
 /* ============================================================ AUDIO */
+// FNV-1a 32-bit over UTF-8, matches scripts/gen-audio.py so pre-generated
+// static files (audio/<hash>.mp3, <hash>_s.mp3 for slow) resolve locally.
+function audHash(t){ const b=new TextEncoder().encode(t); let h=2166136261>>>0; for(const x of b){ h^=x; h=Math.imul(h,16777619)>>>0; } return ('0000000'+h.toString(16)).slice(-8); }
 const Audio={
   ctx:null, ready:false, voices:{harold:null,sarah:null,james:null}, azureToken:null, azureTokenAt:0,
   unlock(){
@@ -633,7 +636,8 @@ const Audio={
     return new Promise(async res=>{
       let srcs=[];
       if(settings.src==='azure' && settings.key && settings.region){ const u=await this.azure(text); if(u)srcs.push(u); }
-      srcs.push(this.googleUrl(text,opt.slow), this.youdaoUrl(text));
+      srcs.push('audio/'+audHash(text)+(opt.slow?'_s':'')+'.mp3'); // pre-generated static, same-origin, reliable
+      srcs.push(this.youdaoUrl(text), this.googleUrl(text,opt.slow)); // runtime fallbacks (single words / non-hosted)
       let i=0; const a=new Audio2();
       const tryNext=()=>{ if(i>=srcs.length){ showBanner(text); res(false); return; } a.src=srcs[i++]; a.play().catch(()=>{}); };
       a.onended=()=>{ hideBanner(); res(true); };

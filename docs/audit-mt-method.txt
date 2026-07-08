@@ -1,0 +1,3 @@
+I'll audit the app against Michel Thomas principles and level coverage by exploring the codebase and any existing audit notes.
+I'll cross-check the app's lesson content against the authentic Harold Goodman Michel Thomas Mandarin curriculum for Foundation, Intermediate, and Advanced.
+[2m2026-07-08T11:53:23.706194Z[0m [31mERROR[0m tool_error: tool_output_error [3msession_id[0m[2m=[0m019f4191-6857-7b83-8b67-419db0976bcf [3mtool_name[0m[2m=[0m"WebFetch" [3meffective_tool_name[0m[2m=[0m"WebFetch" [3mmodel_id[0m[2m=[0m"grok-composer-2.5-fast" [3merror_kind[0m[2m=[0m"tool_output_error"

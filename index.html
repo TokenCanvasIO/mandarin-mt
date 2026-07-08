@@ -123,8 +123,10 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
 .lesson-head h2{margin:2px 0}
 .prog2{font-size:12.5px;color:var(--muted)}
 .wbanner{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:12px;font-size:14px;color:var(--muted)}
-.blk{margin-top:18px;padding:0 2px}                 /* flat by default — reads like book prose */
-.blk.boxed,.blk.drill{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:16px;box-shadow:var(--shadow)}
+.blk{margin-top:14px;padding:0 2px}                 /* flat by default — reads like book prose */
+.blk + .blk{margin-top:14px}
+.blk.boxed,.blk.drill{margin-top:26px}             /* interactive/summary blocks breathe apart */
+.blk.boxed,.blk.drill{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
 .blk.drill{border-left:3px solid var(--accent)}
 .blk .teacher{font-size:17px;line-height:1.6}
 .say{background:transparent;border:1px solid var(--line);opacity:.75}
@@ -376,9 +378,9 @@ const LESSONS=[
   intro:['hao','buhao','hen','nihao','shi','bushi','bu','dui','budui'],
   steps:[
    {type:'tones'},
-   INTRO("Shì means is, am, are — and it never changes. Shì for I, you, he, she, we, they. No conjugation, ever.",['shi']),
-   INTRO("Bù means not. Put bù before any verb and you have the negative. That is all there is to it.",['bu']),
-   INTRO("Now watch. Bù before shì — tone four meets tone four, so the first becomes tone two. Bú shì. The colour changes to blue. Your mouth does this automatically at speed.",['bu','shi']),
+   INTRO("We start with the most useful word in the language. Shì means is, am, and are, all at once. And here is the promise that runs through everything you are about to learn. It never changes. Shì for I, shì for you, shì for him, for her, for us, for them. You will never conjugate a Mandarin verb. Not once.",['shi']),
+   INTRO("Now one more small word, and you can already disagree with anything. Bù means not. It sits in front of a verb, and that is the whole rule. So put bù in front of the word you just learned, shì, and you have 'is not'. But listen to what happens to the sound.",['bu']),
+   INTRO("Bù falls, and shì falls too. When two falling tones meet, the first one lifts and rises instead. Bú shì. You do not have to think about it. Your mouth will do it on its own once the words are moving. The colour turns blue, to remind you it changed.",['bu','shi']),
    EX([
      {who:'Harold',t:"How would you say 'not good'?"},
      {who:'pause'},
@@ -771,11 +773,11 @@ function teachLine(who,text,role){
   line.appendChild(t); return line;
 }
 function blkTeach(who,text,role){ const d=document.createElement('div'); d.className='blk'; d.appendChild(teachLine(who,text,role)); return d; }
-function zhRow(arr){
+function zhRow(arr,withSlow){
   const w=document.createElement('div'); w.className='zh-row'; w.appendChild(renderSent(arr,false));
   const zh=zhText(arr); const mini=document.createElement('div'); mini.className='mini';
-  mini.appendChild(sayBtn(PLAY+' hear',()=>Audio.jingtao(zh)));
-  mini.appendChild(sayBtn('slower',()=>Audio.jingtao(zh,{slow:true})));
+  mini.appendChild(sayBtn(PLAY+' Listen',()=>Audio.jingtao(zh)));
+  if(withSlow) mini.appendChild(sayBtn('slower',()=>Audio.jingtao(zh,{slow:true})));
   w.appendChild(mini); return w;
 }
 function blkTones(){
@@ -827,7 +829,7 @@ function blkDrill(step,si){
   function paint(g){ d.className='blk drill'+(g?' graded-'+g:''); }
   function reveal(auto){
     turn.style.display='none';
-    const ans=zhRow(step.syl); ans.classList.add('reveal-in'); ansWrap.appendChild(ans);
+    const ans=zhRow(step.syl,true); ans.classList.add('reveal-in'); ansWrap.appendChild(ans);
     if(step.note) ansWrap.appendChild(teachLine('Harold',step.note,'harold'));
     logWords(step,key);
     if(!auto) Audio.jingtao(zh);

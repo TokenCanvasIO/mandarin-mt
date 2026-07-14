@@ -355,6 +355,11 @@ window.MY_PHRASES = {
    "zh": "你能帮我吗？"
   },
   {
+   "en": "You are American",
+   "py": "nǐ shì Měiguórén",
+   "zh": "你是美国人"
+  },
+  {
    "en": "I am off to get some lunch",
    "py": "wǒ qù chī wǔfàn le",
    "zh": "我去吃午饭了"
@@ -440,6 +445,16 @@ window.MY_PHRASES = {
    "zh": "贵州的菜很好吃"
   },
   {
+   "en": "We are both American",
+   "py": "wǒmen dōu shì Měiguórén",
+   "zh": "我们都是美国人"
+  },
+  {
+   "en": "You're all Chinese people",
+   "py": "nǐmen dōu shì Zhōngguórén",
+   "zh": "你们都是中国人"
+  },
+  {
    "en": "I really like Guiyang",
    "py": "wǒ zhēn de hěn xǐhuān Guìyáng",
    "zh": "我真的很喜欢贵阳"
@@ -453,6 +468,11 @@ window.MY_PHRASES = {
    "en": "Can I pay by phone?",
    "py": "wǒ kěyǐ yòng shǒujī zhīfù ma",
    "zh": "我可以用手机支付吗"
+  },
+  {
+   "en": "You are Chinese and I am English",
+   "py": "nǐ shì Zhōngguórén, wǒ shì Yīngguórén",
+   "zh": "你是中国人，我是英国人"
   },
   {
    "en": "Can you speak Chinese with me slowly?",

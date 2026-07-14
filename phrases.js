@@ -510,6 +510,11 @@ window.MY_PHRASES = {
    "en": "You are Chinese and I am English",
    "py": "nǐ shì Zhōngguórén, wǒ shì Yīngguórén",
    "zh": "你是中国人，我是英国人"
+  },
+  {
+   "en": "You're all Chinese and we are English but they are both American",
+   "py": "nǐmen dōu shì Zhōngguórén, wǒmen shì Yīngguórén, dànshì tāmen dōu shì Měiguórén",
+   "zh": "你们都是中国人，我们是英国人，但是他们都是美国人"
   }
  ]
 };

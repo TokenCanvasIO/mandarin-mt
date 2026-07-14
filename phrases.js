@@ -489,5 +489,27 @@ window.MY_PHRASES = {
    "py": "wǒ qù shàngbān le, dàihuìr jiàn, zhù nǐ jīntiān yúkuài",
    "zh": "我去上班了，待会儿见，祝你今天愉快"
   }
+ ],
+ "learnt": [
+  {
+   "en": "You are American",
+   "py": "nǐ shì Měiguórén",
+   "zh": "你是美国人"
+  },
+  {
+   "en": "We are both American",
+   "py": "wǒmen dōu shì Měiguórén",
+   "zh": "我们都是美国人"
+  },
+  {
+   "en": "You're all Chinese people",
+   "py": "nǐmen dōu shì Zhōngguórén",
+   "zh": "你们都是中国人"
+  },
+  {
+   "en": "You are Chinese and I am English",
+   "py": "nǐ shì Zhōngguórén, wǒ shì Yīngguórén",
+   "zh": "你是中国人，我是英国人"
+  }
  ]
 };

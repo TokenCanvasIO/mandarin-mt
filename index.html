@@ -266,6 +266,10 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
     </div>
     <button class="bigbtn" style="width:100%;margin-top:14px" id="phrPlayBtn">▶ Play all</button>
     <div id="phrList" style="margin-top:14px"></div>
+    <h2 style="margin-top:26px">Learnt phrases</h2>
+    <div class="sub">Ones you already know — kept out of the main drill. Same player, add to the <b>learnt</b> list in phrases.js.</div>
+    <button class="bigbtn" style="width:100%;margin-top:14px" id="phrLearntBtn">▶ Play learnt</button>
+    <div id="phrLearntList" style="margin-top:14px"></div>
   </div>
 </div>
 
@@ -1047,10 +1051,10 @@ document.getElementById('btnPhrases').onclick=()=>{ renderPhrases(); openOverlay
 // The gap + beep implements listen -> attempt recall aloud -> confirmation cue;
 // the whole list restarts from the top when it finishes, until Stop.
 const Phr={
-  run:0, playing:false, idx:-1,
+  run:0, playing:false, idx:-1, src:'phrases', // 'phrases' = main drill, 'learnt' = known ones
   cfg(){ const d={repeatsPerPhrase:3,recallGapMs:2200,betweenPhrasesMs:900};
     return Object.assign(d,(window.MY_PHRASES&&window.MY_PHRASES.settings)||{}); },
-  list(){ return (window.MY_PHRASES&&window.MY_PHRASES.phrases)||[]; },
+  list(src){ return (window.MY_PHRASES&&window.MY_PHRASES[src||this.src])||[]; },
   sleep(ms,tok){ return new Promise(r=>setTimeout(()=>r(tok===this.run),ms)); },
   beep(){
     return new Promise(r=>{ try{
@@ -1064,8 +1068,8 @@ const Phr={
       o.start(t); o.stop(t+0.18); o.onended=r; setTimeout(r,300);
     }catch(e){r();} });
   },
-  async playAll(){
-    const tok=++this.run; this.playing=true; this.updateBtn();
+  async playAll(src){
+    const tok=++this.run; this.src=src||'phrases'; this.playing=true; this.updateBtn();
     const c=this.cfg(), ps=this.list();
     while(this.run===tok && ps.length){
       for(let i=0;i<ps.length;i++){
@@ -1086,17 +1090,20 @@ const Phr={
     if(this.run===tok){ this.playing=false; this.idx=-1; this.updateBtn(); this.showNow(-1,0); }
   },
   stop(){ this.run++; this.playing=false; this.idx=-1; Audio.stop(); this.updateBtn(); this.showNow(-1,0); },
-  async playOne(i){
-    const tok=++this.run; this.playing=true; this.idx=i; this.updateBtn();
+  async playOne(src,i){
+    const tok=++this.run; this.src=src; this.playing=true; this.idx=i; this.updateBtn();
     const p=this.list()[i]; this.showNow(i,0);
     await Audio.speak('harold',p.en);
     if(this.run===tok){ this.showNow(i,1); await Audio.jingtao(p.zh); }
     if(this.run===tok){ this.playing=false; this.idx=-1; this.updateBtn(); this.showNow(-1,0); }
   },
   updateBtn(){
-    const b=document.getElementById('phrPlayBtn');
-    b.textContent=this.playing?'■ Stop':'▶ Play all';
-    document.querySelectorAll('#phrList .book-item').forEach((el,i)=>el.style.outline=(this.playing&&i===this.idx)?'2px solid var(--primary)':'none');
+    const main=document.getElementById('phrPlayBtn'), learnt=document.getElementById('phrLearntBtn');
+    main.textContent=(this.playing&&this.src==='phrases')?'■ Stop':'▶ Play all';
+    learnt.textContent=(this.playing&&this.src==='learnt')?'■ Stop':'▶ Play learnt';
+    [['phrList','phrases'],['phrLearntList','learnt']].forEach(([id,src])=>{
+      document.querySelectorAll('#'+id+' .book-item').forEach((el,i)=>el.style.outline=(this.playing&&this.src===src&&i===this.idx)?'2px solid var(--primary)':'none');
+    });
   },
   showNow(i,rep){
     const now=document.getElementById('phrNow');
@@ -1111,20 +1118,23 @@ const Phr={
   }
 };
 function renderPhrases(){
-  const list=document.getElementById('phrList'); list.innerHTML='';
-  Phr.list().forEach((p,i)=>{
-    const it=document.createElement('div'); it.className='book-item';
-    const t=document.createElement('div'); t.style.flex='1';
-    t.innerHTML='<div class="py" style="font-weight:600">'+p.py+' <span class="zh">'+p.zh+'</span></div><div class="en">'+p.en+'</div>';
-    it.appendChild(t);
-    const b=document.createElement('button'); b.className='iconbtn'; b.innerHTML=PLAY;
-    b.onclick=()=>Phr.playOne(i); it.appendChild(b);
-    list.appendChild(it);
+  [['phrList','phrases'],['phrLearntList','learnt']].forEach(([id,src])=>{
+    const list=document.getElementById(id); list.innerHTML='';
+    Phr.list(src).forEach((p,i)=>{
+      const it=document.createElement('div'); it.className='book-item';
+      const t=document.createElement('div'); t.style.flex='1';
+      t.innerHTML='<div class="py" style="font-weight:600">'+p.py+' <span class="zh">'+p.zh+'</span></div><div class="en">'+p.en+'</div>';
+      it.appendChild(t);
+      const b=document.createElement('button'); b.className='iconbtn'; b.innerHTML=PLAY;
+      b.onclick=()=>Phr.playOne(src,i); it.appendChild(b);
+      list.appendChild(it);
+    });
+    if(!list.children.length) list.innerHTML='<div class="sub">Nothing here yet — add entries to the '+src+' list in phrases.js.</div>';
   });
-  if(!list.children.length) list.innerHTML='<div class="sub">No phrases yet — add them in phrases.js.</div>';
   Phr.updateBtn();
 }
-document.getElementById('phrPlayBtn').onclick=()=>{ Phr.playing?Phr.stop():Phr.playAll(); };
+document.getElementById('phrPlayBtn').onclick=()=>{ (Phr.playing&&Phr.src==='phrases')?Phr.stop():Phr.playAll('phrases'); };
+document.getElementById('phrLearntBtn').onclick=()=>{ (Phr.playing&&Phr.src==='learnt')?Phr.stop():Phr.playAll('learnt'); };
 document.getElementById('btnSet').onclick=()=>{ document.getElementById('ttsSource').value=settings.src; document.getElementById('azRegion').value=settings.region; document.getElementById('azKey').value=settings.key; document.getElementById('azVoice').value=settings.voice; openOverlay('setOverlay'); };
 
 function renderBook(){

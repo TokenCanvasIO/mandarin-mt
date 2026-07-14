@@ -15,19 +15,9 @@ window.MY_PHRASES = {
  },
  "phrases": [
   {
-   "en": "He",
+   "en": "He / she / it (all sound the same)",
    "py": "tā",
    "zh": "他"
-  },
-  {
-   "en": "She",
-   "py": "tā",
-   "zh": "她"
-  },
-  {
-   "en": "It",
-   "py": "tā",
-   "zh": "它"
   },
   {
    "en": "All",

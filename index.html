@@ -141,6 +141,7 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
 .say svg{width:13px;height:13px}
 .eng{font-size:18px;font-weight:500;align-self:center}
 .zh-row{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.zh-gloss{font-size:14px;font-style:italic;opacity:.72}
 .mini{display:flex;gap:8px;flex-wrap:wrap}
 .beep{text-align:center;color:var(--accent);font-size:13px;letter-spacing:.1em;margin:10px 0}
 .yourturn{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;color:var(--muted);font-size:14px;flex-wrap:wrap}
@@ -858,8 +859,27 @@ function teachLine(who,text,role){
   line.appendChild(t); return line;
 }
 function blkTeach(who,text,role){ const d=document.createElement('div'); d.className='blk'; d.appendChild(teachLine(who,text,role)); return d; }
+// Chinese-text -> English gloss, from VOCAB. Exact phrase match first, then greedy
+// longest-match segmentation (glosses joined with ·). Returns '' when less than
+// half the characters resolve — no gloss beats a wrong one.
+const GLOSS={};
+VOCAB.forEach(v=>{ const c=build(v[2]).map(x=>x.c).join(''); if(c&&!GLOSS[c])GLOSS[c]=v[1]; });
+function glossFor(arr){
+  const s=arr.map(x=>x.c).filter(c=>!'，。？,?.'.includes(c)).join('');
+  if(!s) return '';
+  if(GLOSS[s]) return GLOSS[s];
+  const parts=[]; let i=0, matched=0;
+  while(i<s.length){
+    let hit=null;
+    for(let len=Math.min(6,s.length-i);len>=1;len--){ const seg=s.substr(i,len); if(GLOSS[seg]){hit={len,en:GLOSS[seg]};break;} }
+    if(hit){ parts.push(hit.en); matched+=hit.len; i+=hit.len; } else i++;
+  }
+  return matched>=s.length/2 ? parts.join(' · ') : '';
+}
 function zhRow(arr,withSlow){
   const w=document.createElement('div'); w.className='zh-row'; w.appendChild(renderSent(arr,false));
+  const g=glossFor(arr);
+  if(g){ const e=document.createElement('div'); e.className='zh-gloss'; e.textContent=g; w.appendChild(e); }
   const zh=zhText(arr); const mini=document.createElement('div'); mini.className='mini';
   mini.appendChild(sayBtn(PLAY+' Listen',()=>Audio.jingtao(zh)));
   if(withSlow) mini.appendChild(sayBtn('slower',()=>Audio.jingtao(zh,{slow:true})));

@@ -445,6 +445,11 @@ window.MY_PHRASES = {
    "zh": "我真的很喜欢贵阳"
   },
   {
+   "en": "You and I are both Chinese",
+   "py": "nǐ hé wǒ dōu shì Zhōngguórén",
+   "zh": "你和我都是中国人"
+  },
+  {
    "en": "Can I pay by phone?",
    "py": "wǒ kěyǐ yòng shǒujī zhīfù ma",
    "zh": "我可以用手机支付吗"

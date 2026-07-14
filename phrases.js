@@ -8,23 +8,471 @@
  * work immediately with no build step.
  */
 window.MY_PHRASES = {
-  "settings": {
-    "repeatsPerPhrase": 3,
-    "recallGapMs": 2200,
-    "betweenPhrasesMs": 900
+ "settings": {
+  "repeatsPerPhrase": 3,
+  "recallGapMs": 2200,
+  "betweenPhrasesMs": 900
+ },
+ "phrases": [
+  {
+   "en": "He",
+   "py": "tā",
+   "zh": "他"
   },
-  "phrases": [
-    { "en": "Hello",                          "py": "nǐ hǎo",                          "zh": "你好" },
-    { "en": "Thank you",                      "py": "xièxie",                          "zh": "谢谢" },
-    { "en": "Sorry",                          "py": "duìbuqǐ",                         "zh": "对不起" },
-    { "en": "No problem",                     "py": "méi guānxi",                      "zh": "没关系" },
-    { "en": "Excuse me, may I ask…",          "py": "qǐngwèn",                         "zh": "请问" },
-    { "en": "I don't understand",             "py": "wǒ bù dǒng",                      "zh": "我不懂" },
-    { "en": "I want this one",                "py": "wǒ yào zhège",                    "zh": "我要这个" },
-    { "en": "How much is it?",                "py": "duōshao qián",                    "zh": "多少钱" },
-    { "en": "Please say it again",            "py": "qǐng zài shuō yí biàn",           "zh": "请再说一遍" },
-    { "en": "Do you speak English?",          "py": "nǐ huì shuō Yīngwén ma",          "zh": "你会说英文吗" },
-    { "en": "Where is the bathroom?",         "py": "xǐshǒujiān zài nǎlǐ",             "zh": "洗手间在哪里" },
-    { "en": "Can I pay by phone?",            "py": "wǒ kěyǐ yòng shǒujī zhīfù ma",    "zh": "我可以用手机支付吗" }
-  ]
+  {
+   "en": "She",
+   "py": "tā",
+   "zh": "她"
+  },
+  {
+   "en": "It",
+   "py": "tā",
+   "zh": "它"
+  },
+  {
+   "en": "All",
+   "py": "dōu",
+   "zh": "都"
+  },
+  {
+   "en": "And (joining nouns)",
+   "py": "hé",
+   "zh": "和"
+  },
+  {
+   "en": "And also / too",
+   "py": "yě",
+   "zh": "也"
+  },
+  {
+   "en": "Hi",
+   "py": "nǐ hǎo",
+   "zh": "你好"
+  },
+  {
+   "en": "Very good",
+   "py": "hěn hǎo",
+   "zh": "很好"
+  },
+  {
+   "en": "Good night",
+   "py": "wǎnān",
+   "zh": "晚安"
+  },
+  {
+   "en": "Not bad",
+   "py": "hái xíng",
+   "zh": "还行"
+  },
+  {
+   "en": "Of course",
+   "py": "dāngrán",
+   "zh": "当然"
+  },
+  {
+   "en": "Thank you",
+   "py": "xièxie",
+   "zh": "谢谢"
+  },
+  {
+   "en": "Excuse me, may I ask…",
+   "py": "qǐngwèn",
+   "zh": "请问"
+  },
+  {
+   "en": "Good morning",
+   "py": "zǎoshang hǎo",
+   "zh": "早上好"
+  },
+  {
+   "en": "How are you?",
+   "py": "nǐ hǎo ma?",
+   "zh": "你好吗？"
+  },
+  {
+   "en": "I am hungry",
+   "py": "wǒ è le",
+   "zh": "我饿了"
+  },
+  {
+   "en": "I am thirsty",
+   "py": "wǒ kě le",
+   "zh": "我渴了"
+  },
+  {
+   "en": "I am tired",
+   "py": "wǒ lèi le",
+   "zh": "我累了"
+  },
+  {
+   "en": "Both",
+   "py": "liǎnggè dōu",
+   "zh": "两个都"
+  },
+  {
+   "en": "See you tomorrow",
+   "py": "míngtiān jiàn",
+   "zh": "明天见"
+  },
+  {
+   "en": "I am fine",
+   "py": "wǒ hěn hǎo",
+   "zh": "我很好"
+  },
+  {
+   "en": "I am busy",
+   "py": "wǒ hěn máng",
+   "zh": "我很忙"
+  },
+  {
+   "en": "I am not busy",
+   "py": "wǒ bù máng",
+   "zh": "我不忙"
+  },
+  {
+   "en": "I am cold",
+   "py": "wǒ hěn lěng",
+   "zh": "我很冷"
+  },
+  {
+   "en": "I am hot",
+   "py": "wǒ hěn rè",
+   "zh": "我很热"
+  },
+  {
+   "en": "It is raining",
+   "py": "xià yǔ le",
+   "zh": "下雨了"
+  },
+  {
+   "en": "Really?",
+   "py": "zhēn de ma?",
+   "zh": "真的吗？"
+  },
+  {
+   "en": "No problem",
+   "py": "méi wèntí",
+   "zh": "没问题"
+  },
+  {
+   "en": "That's fine / it doesn't matter",
+   "py": "méi guānxi",
+   "zh": "没关系"
+  },
+  {
+   "en": "Wait a moment",
+   "py": "děng yīxià",
+   "zh": "等一下"
+  },
+  {
+   "en": "You're welcome",
+   "py": "bù kèqi",
+   "zh": "不客气"
+  },
+  {
+   "en": "I am sorry",
+   "py": "duìbuqǐ",
+   "zh": "对不起"
+  },
+  {
+   "en": "That is great",
+   "py": "tài hǎo le",
+   "zh": "太好了"
+  },
+  {
+   "en": "I agree",
+   "py": "wǒ tóngyì",
+   "zh": "我同意"
+  },
+  {
+   "en": "Hi, how is it going?",
+   "py": "nǐ zěnmeyàng?",
+   "zh": "你怎么样？"
+  },
+  {
+   "en": "What time is it?",
+   "py": "xiànzài jǐ diǎn?",
+   "zh": "现在几点？"
+  },
+  {
+   "en": "I don't understand",
+   "py": "wǒ tīng bù dǒng",
+   "zh": "我听不懂"
+  },
+  {
+   "en": "I am back",
+   "py": "wǒ huí lái le",
+   "zh": "我回来了"
+  },
+  {
+   "en": "Welcome back",
+   "py": "huānyíng huí lái",
+   "zh": "欢迎回来"
+  },
+  {
+   "en": "Are you ok?",
+   "py": "nǐ hái hǎo ma?",
+   "zh": "你还好吗？"
+  },
+  {
+   "en": "I am full",
+   "py": "wǒ chī bǎo le",
+   "zh": "我吃饱了"
+  },
+  {
+   "en": "I am going out",
+   "py": "wǒ chūqù le",
+   "zh": "我出去了"
+  },
+  {
+   "en": "I am working",
+   "py": "wǒ zài gōngzuò",
+   "zh": "我在工作"
+  },
+  {
+   "en": "I don't know",
+   "py": "wǒ bù zhīdào",
+   "zh": "我不知道"
+  },
+  {
+   "en": "I think so",
+   "py": "wǒ juéde shì",
+   "zh": "我觉得是"
+  },
+  {
+   "en": "Thank you so much",
+   "py": "fēicháng gǎnxiè",
+   "zh": "非常感谢"
+  },
+  {
+   "en": "I am happy",
+   "py": "wǒ hěn gāoxìng",
+   "zh": "我很高兴"
+  },
+  {
+   "en": "I don't agree",
+   "py": "wǒ bù tóngyì",
+   "zh": "我不同意"
+  },
+  {
+   "en": "I want this one",
+   "py": "wǒ yào zhège",
+   "zh": "我要这个"
+  },
+  {
+   "en": "Did you sleep ok?",
+   "py": "nǐ shuì de hǎo ma?",
+   "zh": "你睡得好吗？"
+  },
+  {
+   "en": "Do you want a cup of tea?",
+   "py": "nǐ yào hē chá ma?",
+   "zh": "你要喝茶吗？"
+  },
+  {
+   "en": "That was delicious",
+   "py": "zhège zhēn hǎochī",
+   "zh": "这个真好吃"
+  },
+  {
+   "en": "I am going to the shop",
+   "py": "wǒ qù shāngdiàn le",
+   "zh": "我去商店了"
+  },
+  {
+   "en": "How much is that?",
+   "py": "zhège duōshao qián?",
+   "zh": "这个多少钱？"
+  },
+  {
+   "en": "What is that?",
+   "py": "nàge shì shénme?",
+   "zh": "那个是什么？"
+  },
+  {
+   "en": "How do you say that?",
+   "py": "zhège zěnme shuō?",
+   "zh": "这个怎么说？"
+  },
+  {
+   "en": "I am a person",
+   "py": "wǒ shì yīgè rén",
+   "zh": "我是一个人"
+  },
+  {
+   "en": "You are a person",
+   "py": "nǐ shì yīgè rén",
+   "zh": "你是一个人"
+  },
+  {
+   "en": "She is a person",
+   "py": "tā shì yīgè rén",
+   "zh": "她是一个人"
+  },
+  {
+   "en": "He is a person",
+   "py": "tā shì yīgè rén",
+   "zh": "他是一个人"
+  },
+  {
+   "en": "You are Chinese",
+   "py": "nǐ shì Zhōngguórén",
+   "zh": "你是中国人"
+  },
+  {
+   "en": "I am Chinese",
+   "py": "wǒ shì Zhōngguórén",
+   "zh": "我是中国人"
+  },
+  {
+   "en": "I am English / British",
+   "py": "wǒ shì Yīngguórén",
+   "zh": "我是英国人"
+  },
+  {
+   "en": "Do you want some water?",
+   "py": "nǐ yào hē shuǐ ma?",
+   "zh": "你要喝水吗？"
+  },
+  {
+   "en": "I am coming back soon",
+   "py": "wǒ mǎshàng huí lái",
+   "zh": "我马上回来"
+  },
+  {
+   "en": "I am going for a walk",
+   "py": "wǒ qù sànbù le",
+   "zh": "我去散步了"
+  },
+  {
+   "en": "What are you doing?",
+   "py": "nǐ zài zuò shénme?",
+   "zh": "你在做什么？"
+  },
+  {
+   "en": "I am on the phone",
+   "py": "wǒ zài dǎ diànhuà",
+   "zh": "我在打电话"
+  },
+  {
+   "en": "I don't think so",
+   "py": "wǒ juéde bú shì",
+   "zh": "我觉得不是"
+  },
+  {
+   "en": "Can you help me?",
+   "py": "nǐ néng bāng wǒ ma?",
+   "zh": "你能帮我吗？"
+  },
+  {
+   "en": "I am off to get some lunch",
+   "py": "wǒ qù chī wǔfàn le",
+   "zh": "我去吃午饭了"
+  },
+  {
+   "en": "It's so good to be here",
+   "py": "néng lái zhèr zhēn hǎo",
+   "zh": "能来这儿真好"
+  },
+  {
+   "en": "What a nice day",
+   "py": "jīntiān tiānqì zhēn hǎo",
+   "zh": "今天天气真好"
+  },
+  {
+   "en": "Do you want to go for a walk?",
+   "py": "nǐ xiǎng qù sànbù ma?",
+   "zh": "你想去散步吗？"
+  },
+  {
+   "en": "I will be back in a minute",
+   "py": "wǒ yīhuìr huí lái",
+   "zh": "我一会儿回来"
+  },
+  {
+   "en": "That is very interesting",
+   "py": "zhège hěn yǒu yìsi",
+   "zh": "这个很有意思"
+  },
+  {
+   "en": "I am learning Chinese",
+   "py": "wǒ zhèngzài xué zhōngwén",
+   "zh": "我正在学中文"
+  },
+  {
+   "en": "I want to come back to Guiyang",
+   "py": "wǒ xiǎng zài lái Guìyáng",
+   "zh": "我想再来贵阳"
+  },
+  {
+   "en": "Do you speak English?",
+   "py": "nǐ huì shuō Yīngwén ma",
+   "zh": "你会说英文吗"
+  },
+  {
+   "en": "Where is the bathroom?",
+   "py": "xǐshǒujiān zài nǎlǐ",
+   "zh": "洗手间在哪里"
+  },
+  {
+   "en": "Do you want to get some lunch?",
+   "py": "nǐ xiǎng qù chī wǔfàn ma?",
+   "zh": "你想去吃午饭吗？"
+  },
+  {
+   "en": "Do you want to eat something?",
+   "py": "nǐ xiǎng chī diǎn shénme ma?",
+   "zh": "你想吃点什么吗？"
+  },
+  {
+   "en": "That smells good",
+   "py": "zhège wén qǐlái hěn xiāng",
+   "zh": "这个闻起来很香"
+  },
+  {
+   "en": "Can you say it again?",
+   "py": "nǐ néng zài shuō yīcì ma?",
+   "zh": "你能再说一次吗？"
+  },
+  {
+   "en": "Can you speak more slowly?",
+   "py": "nǐ néng shuō màn yīdiǎn ma?",
+   "zh": "你能说慢一点吗？"
+  },
+  {
+   "en": "My Chinese is not very good",
+   "py": "wǒ de zhōngwén bù tài hǎo",
+   "zh": "我的中文不太好"
+  },
+  {
+   "en": "The food in Guizhou is very good",
+   "py": "Guìzhōu de cài hěn hǎochī",
+   "zh": "贵州的菜很好吃"
+  },
+  {
+   "en": "I really like Guiyang",
+   "py": "wǒ zhēn de hěn xǐhuān Guìyáng",
+   "zh": "我真的很喜欢贵阳"
+  },
+  {
+   "en": "Can I pay by phone?",
+   "py": "wǒ kěyǐ yòng shǒujī zhīfù ma",
+   "zh": "我可以用手机支付吗"
+  },
+  {
+   "en": "Can you speak Chinese with me slowly?",
+   "py": "nǐ néng mànmàn de gēn wǒ shuō zhōngwén ma?",
+   "zh": "你能慢慢地跟我说中文吗？"
+  },
+  {
+   "en": "Do you want some coffee or another drink?",
+   "py": "nǐ yào hē kāfēi háishì biéde yǐnliào ma?",
+   "zh": "你要喝咖啡还是别的饮料吗？"
+  },
+  {
+   "en": "I am off to work, see you later, have a good day",
+   "py": "wǒ qù shàngbān le, dàihuìr jiàn, zhù nǐ jīntiān yúkuài",
+   "zh": "我去上班了，待会儿见，祝你今天愉快"
+  }
+ ]
 };

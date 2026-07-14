@@ -513,8 +513,8 @@ window.MY_PHRASES = {
   },
   {
    "en": "You're all Chinese and we are English but they are both American",
-   "py": "nǐmen dōu shì Zhōngguórén, wǒmen shì Yīngguórén, dànshì tāmen dōu shì Měiguórén",
-   "zh": "你们都是中国人，我们是英国人，但是他们都是美国人"
+   "py": "nǐmen dōu shì Zhōngguórén, wǒmen shì Yīngguórén, kěshì tāmen dōu shì Měiguórén",
+   "zh": "你们都是中国人，我们是英国人，可是他们都是美国人"
   }
  ]
 };

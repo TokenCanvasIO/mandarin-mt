@@ -530,6 +530,31 @@ window.MY_PHRASES = {
    "en": "Is she busy?",
    "py": "tā máng ma?",
    "zh": "她忙吗？"
+  },
+  {
+   "en": "You are not busy",
+   "py": "nǐ bù máng",
+   "zh": "你不忙"
+  },
+  {
+   "en": "Are you not busy?",
+   "py": "nǐ bù máng ma?",
+   "zh": "你不忙吗？"
+  },
+  {
+   "en": "Are you both busy?",
+   "py": "nǐmen liǎnggè dōu máng ma?",
+   "zh": "你们两个都忙吗？"
+  },
+  {
+   "en": "She is busy and he is not busy",
+   "py": "tā hěn máng, tā bù máng",
+   "zh": "她很忙，他不忙"
+  },
+  {
+   "en": "We are both busy, are you?",
+   "py": "wǒmen dōu hěn máng, nǐ ne?",
+   "zh": "我们都很忙，你呢？"
   }
  ]
 };

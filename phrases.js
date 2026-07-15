@@ -515,6 +515,21 @@ window.MY_PHRASES = {
    "en": "You're all Chinese and we are English but they are both American",
    "py": "nǐmen dōu shì Zhōngguórén, wǒmen shì Yīngguórén, kěshì tāmen dōu shì Měiguórén",
    "zh": "你们都是中国人，我们是英国人，可是他们都是美国人"
+  },
+  {
+   "en": "How about you?",
+   "py": "nǐ ne?",
+   "zh": "你呢？"
+  },
+  {
+   "en": "Are you busy?",
+   "py": "nǐ máng ma?",
+   "zh": "你忙吗？"
+  },
+  {
+   "en": "Is she busy?",
+   "py": "tā máng ma?",
+   "zh": "她忙吗？"
   }
  ]
 };

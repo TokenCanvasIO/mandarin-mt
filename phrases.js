@@ -555,6 +555,66 @@ window.MY_PHRASES = {
    "en": "We are both busy, are you?",
    "py": "wǒmen dōu hěn máng, nǐ ne?",
    "zh": "我们都很忙，你呢？"
+  },
+  {
+   "en": "Why?",
+   "py": "wèishénme?",
+   "zh": "为什么？"
+  },
+  {
+   "en": "Water",
+   "py": "shuǐ",
+   "zh": "水"
+  },
+  {
+   "en": "Fire",
+   "py": "huǒ",
+   "zh": "火"
+  },
+  {
+   "en": "Wind",
+   "py": "fēng",
+   "zh": "风"
+  },
+  {
+   "en": "Tree / wood",
+   "py": "mù",
+   "zh": "木"
+  },
+  {
+   "en": "Grove (two trees)",
+   "py": "lín",
+   "zh": "林"
+  },
+  {
+   "en": "Forest (three trees)",
+   "py": "sēn",
+   "zh": "森"
+  },
+  {
+   "en": "Rest (person leaning on a tree)",
+   "py": "xiū",
+   "zh": "休"
+  },
+  {
+   "en": "Mountain",
+   "py": "shān",
+   "zh": "山"
+  },
+  {
+   "en": "Sun / day",
+   "py": "rì",
+   "zh": "日"
+  },
+  {
+   "en": "Moon / month",
+   "py": "yuè",
+   "zh": "月"
+  },
+  {
+   "en": "To read (a book)",
+   "py": "kàn shū",
+   "zh": "看书"
   }
  ]
 };

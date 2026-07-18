@@ -645,6 +645,11 @@ window.MY_PHRASES = {
    "en": "He is ok now",
    "py": "tā xiànzài hěn hǎo",
    "zh": "他现在很好"
+  },
+  {
+   "en": "Why are you so busy now?",
+   "py": "wèishénme nǐ xiànzài zhème máng?",
+   "zh": "为什么你现在这么忙？"
   }
  ]
 };

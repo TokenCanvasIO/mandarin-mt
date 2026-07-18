@@ -615,6 +615,26 @@ window.MY_PHRASES = {
    "en": "To read (a book)",
    "py": "kàn shū",
    "zh": "看书"
+  },
+  {
+   "en": "Why is she busy?",
+   "py": "tā wèishénme máng?",
+   "zh": "她为什么忙？"
+  },
+  {
+   "en": "Why is he busy?",
+   "py": "tā wèishénme máng?",
+   "zh": "他为什么忙？"
+  },
+  {
+   "en": "Why are they busy?",
+   "py": "tāmen wèishénme máng?",
+   "zh": "他们为什么忙？"
+  },
+  {
+   "en": "Why are they busy now?",
+   "py": "tāmen xiànzài wèishénme máng?",
+   "zh": "他们现在为什么忙？"
   }
  ]
 };

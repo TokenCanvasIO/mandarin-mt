@@ -635,6 +635,11 @@ window.MY_PHRASES = {
    "en": "Why are they busy now?",
    "py": "tāmen xiànzài wèishénme máng?",
    "zh": "他们现在为什么忙？"
+  },
+  {
+   "en": "Why are they so busy now?",
+   "py": "tāmen xiànzài wèishénme zhème máng?",
+   "zh": "他们现在为什么这么忙？"
   }
  ]
 };

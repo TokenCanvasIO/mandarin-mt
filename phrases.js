@@ -685,6 +685,11 @@ window.MY_PHRASES = {
    "en": "Can he see her now?",
    "py": "tā xiànzài néng jiàn tā ma?",
    "zh": "他现在能见她吗？"
+  },
+  {
+   "en": "I want to see you now but you don't want to see me",
+   "py": "wǒ xiànzài xiǎng jiàn nǐ, dànshì nǐ bù xiǎng jiàn wǒ",
+   "zh": "我现在想见你，但是你不想见我"
   }
  ]
 };

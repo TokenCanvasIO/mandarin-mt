@@ -35,6 +35,16 @@ window.MY_PHRASES = {
    "zh": "也"
   },
   {
+   "en": "Who?",
+   "py": "shéi?",
+   "zh": "谁？"
+  },
+  {
+   "en": "To buy",
+   "py": "mǎi",
+   "zh": "买"
+  },
+  {
    "en": "Hi",
    "py": "nǐ hǎo",
    "zh": "你好"
@@ -68,6 +78,66 @@ window.MY_PHRASES = {
    "en": "Excuse me, may I ask…",
    "py": "qǐngwèn",
    "zh": "请问"
+  },
+  {
+   "en": "Because",
+   "py": "yīnwei",
+   "zh": "因为"
+  },
+  {
+   "en": "My / mine",
+   "py": "wǒde",
+   "zh": "我的"
+  },
+  {
+   "en": "Your / yours",
+   "py": "nǐde",
+   "zh": "你的"
+  },
+  {
+   "en": "His / hers",
+   "py": "tāde",
+   "zh": "他的"
+  },
+  {
+   "en": "Friend",
+   "py": "péngyǒu",
+   "zh": "朋友"
+  },
+  {
+   "en": "Teacher",
+   "py": "lǎoshī",
+   "zh": "老师"
+  },
+  {
+   "en": "Student",
+   "py": "xuéshēng",
+   "zh": "学生"
+  },
+  {
+   "en": "Goodbye (see you again)",
+   "py": "zàijiàn",
+   "zh": "再见"
+  },
+  {
+   "en": "Thing / things",
+   "py": "dōngxi",
+   "zh": "东西"
+  },
+  {
+   "en": "Where?",
+   "py": "nǎr?",
+   "zh": "哪儿？"
+  },
+  {
+   "en": "Here",
+   "py": "zhèr",
+   "zh": "这儿"
+  },
+  {
+   "en": "There",
+   "py": "nàr",
+   "zh": "那儿"
   },
   {
    "en": "Good morning",
@@ -175,6 +245,16 @@ window.MY_PHRASES = {
    "zh": "我同意"
   },
   {
+   "en": "Our / ours",
+   "py": "wǒmende",
+   "zh": "我们的"
+  },
+  {
+   "en": "Who is she?",
+   "py": "tā shì shéi?",
+   "zh": "她是谁？"
+  },
+  {
    "en": "Hi, how is it going?",
    "py": "nǐ zěnmeyàng?",
    "zh": "你怎么样？"
@@ -248,6 +328,11 @@ window.MY_PHRASES = {
    "en": "I want this one",
    "py": "wǒ yào zhège",
    "zh": "我要这个"
+  },
+  {
+   "en": "Where is he?",
+   "py": "tā zài nǎr?",
+   "zh": "他在哪儿？"
   },
   {
    "en": "Did you sleep ok?",
@@ -360,6 +445,11 @@ window.MY_PHRASES = {
    "zh": "你是美国人"
   },
   {
+   "en": "I want to buy things (go shopping)",
+   "py": "wǒ yào mǎi dōngxi",
+   "zh": "我要买东西"
+  },
+  {
    "en": "I am off to get some lunch",
    "py": "wǒ qù chī wǔfàn le",
    "zh": "我去吃午饭了"
@@ -408,6 +498,16 @@ window.MY_PHRASES = {
    "en": "Where is the bathroom?",
    "py": "xǐshǒujiān zài nǎlǐ",
    "zh": "洗手间在哪里"
+  },
+  {
+   "en": "Because I am too busy",
+   "py": "yīnwei wǒ tài máng le",
+   "zh": "因为我太忙了"
+  },
+  {
+   "en": "This is my friend",
+   "py": "zhè shì wǒde péngyǒu",
+   "zh": "这是我的朋友"
   },
   {
    "en": "Do you want to get some lunch?",
@@ -483,6 +583,11 @@ window.MY_PHRASES = {
    "en": "Do you want some coffee or another drink?",
    "py": "nǐ yào hē kāfēi háishì biéde yǐnliào ma?",
    "zh": "你要喝咖啡还是别的饮料吗？"
+  },
+  {
+   "en": "We are both teachers, but he is a student",
+   "py": "wǒmen dōu shì lǎoshī, dànshì tā shì xuéshēng",
+   "zh": "我们都是老师，但是他是学生"
   },
   {
    "en": "I am off to work, see you later, have a good day",

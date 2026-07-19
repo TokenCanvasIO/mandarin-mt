@@ -16,6 +16,8 @@ xièxie, bù kèqi, numbers, days.  (* = covered via Mark's phrase lists, not le
 
 ## Gaps — queued in course teaching order
 
+> Tier 1 ADDED to the main drill 2026-07-19 (21 entries incl. example sentences), audio generated.
+
 ### Tier 1: everyday essentials the app has nowhere
 1. CD3-1  yīnwei — because (pairs with wèishénme: the answer word)
 2. CD3-2  possessive set: wǒde / nǐde / tāde / wǒmende / nǐmende / tāmende; péngyǒu (friend)
